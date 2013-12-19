@@ -1,5 +1,7 @@
 package org.aschyiel.rpg.activities;
 
+import java.util.Collection;
+
 import android.os.Bundle; 
 import android.app.Activity;
 import android.view.Menu;
@@ -103,7 +105,6 @@ public class Terrain
     callback.onCreateResourcesFinished();
   }
 
-
   @Override
   public void onCreateScene( OnCreateSceneCallback callback )
       throws Exception
@@ -136,9 +137,43 @@ public class Terrain
   public void onPopulateScene( Scene scene, OnPopulateSceneCallback callback )
       throws Exception
   {
+    setupTiles();
+    
     callback.onPopulateSceneFinished();
   }
 
+  /**
+   * Our chess board.
+   */
+  private Collection<TerrainTile> tiles;
+  
+  /**
+   * Look up a terrain-tile based on the in-game coordinates. 
+   */
+  private TerrainTile getTile( Coordinates coords )
+  {
+    final int l = TerrainTile.SIZE;
+    float x = coords.getX(); 
+    float y = coords.getY();
+    x -= x % l;    // Snap them to the tile coordinates.
+    y -= y % l;
+    
+    Coordinates them;
+    for ( TerrainTile tile : tiles )
+    {
+      them = tile.coords;
+      if ( them.getX()     >= x &&
+           them.getX() + l <= x &&
+           them.getY()     <= y &&
+           them.getY() + l <= y )
+      {
+        // If our coordinates takes place within a tile, then that's the one.
+        return tile;
+      }
+    }
+    return null;
+  }
+  
   /**
    * Required by IClickDetectorListener
    * 
@@ -172,6 +207,28 @@ public class Terrain
     selected = ( null == gameObject )? null : gameObject;
   }
 
+  /**
+   * Setup our chess board pieces;
+   * Each tile is assigned an id indicating it's index.
+   * Probably as an array.
+   */
+  private void setupTiles()
+  {
+    int l       = TerrainTile.SIZE;
+    int max     = TerrainTile.DEFAULT_MAX_TILES;
+    int rows    = TerrainTile.DEFAULT_MAX_ROWS;
+    int columns = TerrainTile.DEFAULT_MAX_COLUMNS;
+    // TODO: Different levels will have different tile sizes. -uly, 191213.
+        
+    for ( int idx = 0; idx < max; idx++ )
+    {
+      // Snap the coordinates to the tile.
+      int x = l * ( idx % columns );
+      int y = l * ( idx % rows );
+      tiles.add( new TerrainTile( idx, x, y ) );
+    }
+  }
+  
   //-----------------------------------
   //
   // Private Inner Classes
@@ -198,6 +255,11 @@ public class Terrain
      */
     public Coordinates coords;
 
+    /**
+     * The width/height of a tile in coordinate-space units.
+     */
+    public static final int SIZE = 32;
+
     TerrainTile( int id, float x, float y )
     {
       this.id = id;
@@ -212,6 +274,11 @@ public class Terrain
      * a single square at a time.
      */
     public IGameObject occupant; 
+   
+    /** The default board size, modeled after (you guessed it) a chess board. */
+    public static final int DEFAULT_MAX_TILES   = 64;
+    public static final int DEFAULT_MAX_COLUMNS =  8;
+    public static final int DEFAULT_MAX_ROWS    =  8;
   }
   
 }
