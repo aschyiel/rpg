@@ -12,11 +12,16 @@ import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.RepeatingSpriteBackground;
+import org.andengine.entity.sprite.AnimatedSprite;
+import org.andengine.input.touch.detector.ClickDetector;
+import org.andengine.input.touch.detector.ClickDetector.IClickDetectorListener;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.ui.activity.BaseGameActivity;
+import org.aschyiel.rpg.Coordinates;
+import org.aschyiel.rpg.IGameObject;
 
 /**
  * Written against AndEngine GLES2 
@@ -25,6 +30,7 @@ import org.andengine.ui.activity.BaseGameActivity;
  */
 public class Terrain
     extends BaseGameActivity
+    implements IClickDetectorListener
 {
 
   //-----------------------------------
@@ -42,12 +48,19 @@ public class Terrain
   //
   //-----------------------------------
 
+  private ClickDetector clickDetector;
+  
   private Camera camera;
 
   private RepeatingSpriteBackground grassBackground;
 
   private BitmapTextureAtlas bitmapTextureAtlas;
-  private TiledTextureRegion playerTextureRegion;
+  private TiledTextureRegion tankTextureRegion;
+ 
+  /**
+   * The currently user-selected game-object.
+   */
+  private IGameObject selected;
 
   //-----------------------------------
   //
@@ -83,10 +96,10 @@ public class Terrain
         getVertexBufferObjectManager() );
 
     bitmapTextureAtlas = new BitmapTextureAtlas( getTextureManager(), 128, 128 );
-    playerTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
-        bitmapTextureAtlas, this, "player.png", 0, 0, 3, 4 );
-    bitmapTextureAtlas.load();
-    
+    tankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
+        bitmapTextureAtlas, this, "tank1.png", 0, 0, 3, 4 );
+    bitmapTextureAtlas.load(); 
+
     callback.onCreateResourcesFinished();
   }
 
@@ -97,7 +110,24 @@ public class Terrain
   {
     final Scene scene = new Scene();
     scene.setBackground( grassBackground );
-    
+
+    //
+    // Add game objects.
+    //
+
+    final AnimatedSprite tank = new AnimatedSprite( 10, 10, 48, 64,
+        tankTextureRegion, getVertexBufferObjectManager() );
+    scene.attachChild( tank );
+
+    //
+    // Add listeners.
+    //
+    clickDetector = new ClickDetector( this ); 
+
+    //
+    // Finally, execute the callback.
+    //
+
     callback.onCreateSceneFinished( scene );
   }
 
@@ -108,5 +138,80 @@ public class Terrain
   {
     callback.onPopulateSceneFinished();
   }
+
+  /**
+   * Required by IClickDetectorListener
+   * 
+   * The user clicked somewhere within the view,
+   * figure out which game-object they clicked on,
+   * and apply the appropriate actions from therein.
+   */
+  @Override 
+  public void onClick( final ClickDetector pClickDetector,
+                       final int pPointerID,
+                       final float pSceneX,
+                       final float pSceneY )
+  {
+    final Coordinates here = new Coordinates( pSceneX, pSceneY );
+    final TerrainTile tile = getTile( here );
+    final IGameObject gameObject = ( null == tile )? null : tile.occupant;
     
+    // Select new targets.
+    
+    // Double-check that it's a legal user-move.
+    
+    // Apply queued action to new target, if any.
+
+
+
+    //
+    // Set the currently selected thing in preparation of
+    // the next click-handler iteration.
+    //
+
+    selected = ( null == gameObject )? null : gameObject;
+  }
+
+  //-----------------------------------
+  //
+  // Private Inner Classes
+  //
+  //-----------------------------------
+
+  /**
+   * A unit of spatial representation; a chunk of the terrain view.
+   * Think of it as a single square on a chess board.
+   *
+   * Terrain-tiles are NOT to be rendered.  Things can be rendered where
+   * terrain-tiles go, but the tiles themselves are to remain abstract.
+   */
+  private class TerrainTile
+  {
+    /**
+     * The tile number corresponding to the tile array index.
+     */
+    public int id;
+
+    /**
+     * The "exact" location of this piece of tile.
+     * Useful for quickly placing units exactly within it's proper bounds.
+     */
+    public Coordinates coords;
+
+    TerrainTile( int id, float x, float y )
+    {
+      this.id = id;
+      this.coords = new Coordinates( x, y );
+    }
+
+    /**
+     * The current occupant for a tile.
+     * There can only be a single thing standing on a tile at a time;
+     * 
+     * Again with the chess analogy, only a single pawn an occupy
+     * a single square at a time.
+     */
+    public IGameObject occupant; 
+  }
+  
 }
