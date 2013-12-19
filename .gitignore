@@ -6,3 +6,5 @@ bin
 bin/**/*
 gen
 gen/**/*
+.DS_Store
+**/.DS_Store
