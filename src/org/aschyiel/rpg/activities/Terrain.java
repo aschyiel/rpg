@@ -62,7 +62,7 @@ public class Terrain
   /**
    * The currently user-selected game-object.
    */
-  private IGameObject selected;
+  private IGameObject currentlySelectedUnit;
 
   //-----------------------------------
   //
@@ -183,28 +183,45 @@ public class Terrain
    */
   @Override 
   public void onClick( final ClickDetector pClickDetector,
-                       final int pPointerID,
-                       final float pSceneX,
-                       final float pSceneY )
+                       final int           pPointerID,
+                       final float         pSceneX,
+                       final float         pSceneY )
   {
     final Coordinates here = new Coordinates( pSceneX, pSceneY );
     final TerrainTile tile = getTile( here );
-    final IGameObject gameObject = ( null == tile )? null : tile.occupant;
-    
-    // Select new targets.
-    
-    // Double-check that it's a legal user-move.
-    
-    // Apply queued action to new target, if any.
 
+    // The thing we're applying out click against, if any.
+    // ie. Targetting another tank to attack.
+    final IGameObject targetUnit = ( null == tile )? null : tile.occupant;
+    
+    final IGameObject it = currentlySelectedUnit;    // shorthand.
 
+    //
+    // Apply the appropriate implied action based on what we've clicked on.
+    //
+
+    if ( null != it )
+    { 
+      // TODO: Abstract this to allow different actions like "Healing" other units. -uly, 191213.
+      boolean isMoving = null == targetUnit;
+      if ( isMoving )
+      {
+        it.move( here );
+      }
+      else if ( null != targetUnit )
+      {
+        it.attack( targetUnit );
+      }
+    }
 
     //
     // Set the currently selected thing in preparation of
     // the next click-handler iteration.
     //
 
-    selected = ( null == gameObject )? null : gameObject;
+    currentlySelectedUnit = ( null == targetUnit )?
+                            null       : ( it != targetUnit && targetUnit.isBelongToUs() )?
+                            targetUnit : null;
   }
 
   /**

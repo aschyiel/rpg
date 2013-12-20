@@ -8,3 +8,7 @@ gen
 gen/**/*
 .DS_Store
 **/.DS_Store
+
+rpg.sublime-project
+rpg.sublime-workspace
+
