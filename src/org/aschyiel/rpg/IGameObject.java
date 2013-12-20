@@ -30,9 +30,10 @@ public interface IGameObject
   public void move( Coordinates destination ); 
 
   /**
-  * Set the GUI representation for this thing. 
+  * The GUI representation/property for this thing. 
   */
   public void setSprite( Sprite sprite );
+  public Sprite getSprite();
 
   /**
   * Returns true if this unit belongs to our player.

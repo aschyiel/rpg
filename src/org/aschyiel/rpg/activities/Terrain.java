@@ -22,8 +22,12 @@ import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegion
 import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.ui.activity.BaseGameActivity;
+
 import org.aschyiel.rpg.Coordinates;
 import org.aschyiel.rpg.IGameObject;
+import org.aschyiel.rpg.Resorcerer;
+import org.aschyiel.rpg.GameObjectFactory;
+import org.aschyiel.rpg.GameObjectType;
 
 /**
  * Written against AndEngine GLES2 
@@ -41,8 +45,8 @@ public class Terrain
   //
   //-----------------------------------
 
-  private static final int CAMERA_WIDTH  = 720;
-  private static final int CAMERA_HEIGHT = 480;
+  public static final int CAMERA_WIDTH  = 720;
+  public static final int CAMERA_HEIGHT = 480;
 
   //-----------------------------------
   //
@@ -53,11 +57,6 @@ public class Terrain
   private ClickDetector clickDetector;
   
   private Camera camera;
-
-  private RepeatingSpriteBackground grassBackground;
-
-  private BitmapTextureAtlas bitmapTextureAtlas;
-  private TiledTextureRegion tankTextureRegion;
  
   /**
    * The currently user-selected game-object.
@@ -86,39 +85,37 @@ public class Terrain
     return engineOptions;
   }
 
+  /** A private reference to the resource manager for this activity instance. */
+  private Resorcerer resorcerer;
+
   @Override
   public void onCreateResources( OnCreateResourcesCallback callback )
       throws Exception
   {
     BitmapTextureAtlasTextureRegionFactory.setAssetBasePath( "gfx/" );
 
-    grassBackground = new RepeatingSpriteBackground(
-        CAMERA_WIDTH, CAMERA_HEIGHT, getTextureManager(),
-        AssetBitmapTextureAtlasSource.create( getAssets(), "gfx/background_grass.png"),
-        getVertexBufferObjectManager() );
-
-    bitmapTextureAtlas = new BitmapTextureAtlas( getTextureManager(), 128, 128 );
-    tankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
-        bitmapTextureAtlas, this, "tank1.png", 0, 0, 3, 4 );
-    bitmapTextureAtlas.load(); 
+    resorcerer = new Resorcerer()
+        .setGameActivity(              this )
+        .setTextureManager(            getTextureManager() )
+        .setAssets(                    getAssets() )
+        .setVertexBufferObjectManager( getVertexBufferObjectManager() );
+    resorcerer.onCreateResources();
 
     callback.onCreateResourcesFinished();
   }
 
+  private GameObjectFactory plant;
+  
   @Override
   public void onCreateScene( OnCreateSceneCallback callback )
       throws Exception
   {
     final Scene scene = new Scene();
-    scene.setBackground( grassBackground );
+    scene.setBackground( resorcerer.grassBackground );
 
-    //
-    // Add game objects.
-    //
-
-    final AnimatedSprite tank = new AnimatedSprite( 10, 10, 48, 64,
-        tankTextureRegion, getVertexBufferObjectManager() );
-    scene.attachChild( tank );
+    plant = new GameObjectFactory( resorcerer );
+    final IGameObject tank = plant.make( GameObjectType.TANK );
+    scene.attachChild( tank.getSprite() );    // TODO: Abstract via controller.
 
     //
     // Add listeners.
