@@ -30,14 +30,10 @@ public class Resorcerer
   //---------------------------------
 
   private VertexBufferObjectManager vertexBufferObjectManager;
-
-  private TextureManager textureManager;
-
-  private BitmapTextureAtlas atlas;
-
-  private BaseGameActivity gameActivity;
-
-  private AssetManager assets;
+  private TextureManager            textureManager;
+  private BitmapTextureAtlas        atlas;
+  private BaseGameActivity          gameActivity;
+  private AssetManager              assets;
 
   //---------------------------------
   //
@@ -75,17 +71,17 @@ public class Resorcerer
   //
   //---------------------------------
 
-  public TiledTextureRegion tankTextureRegion;
-
+  public TiledTextureRegion        tankTextureRegion;
   public RepeatingSpriteBackground grassBackground;
-
 
   /**
   * Setup our graphics, etc.
   * To be called by the parent game-activity when it's onCreateResources happens.
   */
   public void onCreateResources()
-  { 
+  {
+    // GOTCHA: Assumes that "gfx/" is already set as our base-path.
+
     grassBackground = new RepeatingSpriteBackground(
         Terrain.CAMERA_WIDTH,
         Terrain.CAMERA_HEIGHT,
@@ -111,8 +107,4 @@ public class Resorcerer
        tankTextureRegion, vertexBufferObjectManager );
    
   }
-
-  
-
-
 }

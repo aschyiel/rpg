@@ -115,6 +115,7 @@ public class Terrain
 
     plant = new GameObjectFactory( resorcerer );
     final IGameObject tank = plant.make( GameObjectType.TANK );
+    tank.setCoords( new Coordinates( 50, 50 ) );
     scene.attachChild( tank.getSprite() );    // TODO: Abstract via controller.
 
     //
@@ -188,7 +189,7 @@ public class Terrain
     final TerrainTile tile = getTile( here );
 
     // The thing we're applying out click against, if any.
-    // ie. Targetting another tank to attack.
+    // ie. Targeting another tank to attack.
     final IGameObject targetUnit = ( null == tile )? null : tile.occupant;
     
     final IGameObject it = currentlySelectedUnit;    // shorthand.

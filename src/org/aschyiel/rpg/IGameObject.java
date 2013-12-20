@@ -16,8 +16,10 @@ public interface IGameObject
   * ie. Figure out the current tile for a game-object based
   *     on it's current coordinates.
   */
-  public void getCoords( Coordinates coords ); 
-  public void setCoords( Coordinates coords ); 
+  public Coordinates getCoords();
+
+  /** Use "move" instead - otherwise, at spawn time use setCoords. */
+  public void setCoords( Coordinates coords );
 
   /**
   * Tell the game-object to move itself to a new destination;
