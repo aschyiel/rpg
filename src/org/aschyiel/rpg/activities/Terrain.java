@@ -1,20 +1,25 @@
 package org.aschyiel.rpg.activities;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import android.os.Bundle; 
 import android.app.Activity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.Display;
+import android.view.MotionEvent;
 
 import org.andengine.engine.FixedStepEngine;
 import org.andengine.engine.camera.Camera;
 import org.andengine.engine.options.EngineOptions;
 import org.andengine.engine.options.ScreenOrientation;
 import org.andengine.engine.options.resolutionpolicy.RatioResolutionPolicy;
+import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.RepeatingSpriteBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
+import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.detector.ClickDetector;
 import org.andengine.input.touch.detector.ClickDetector.IClickDetectorListener;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
@@ -36,7 +41,7 @@ import org.aschyiel.rpg.GameObjectType;
  */
 public class Terrain
     extends BaseGameActivity
-    implements IClickDetectorListener
+    implements IOnSceneTouchListener
 {
 
   //-----------------------------------
@@ -44,6 +49,9 @@ public class Terrain
   // Constants.
   //
   //-----------------------------------
+
+  /** For printing to console. */
+  private static final String TAG = "[Terrain]";
 
   public static final int CAMERA_WIDTH  = 720;
   public static final int CAMERA_HEIGHT = 480;
@@ -121,7 +129,8 @@ public class Terrain
     //
     // Add listeners.
     //
-    clickDetector = new ClickDetector( this ); 
+
+    scene.setOnSceneTouchListener( this );
 
     //
     // Finally, execute the callback.
@@ -143,7 +152,8 @@ public class Terrain
   /**
    * Our chess board.
    */
-  private Collection<TerrainTile> tiles;
+  private Collection<TerrainTile> tiles = new ArrayList<TerrainTile>();
+
   
   /**
    * Look up a terrain-tile based on the in-game coordinates. 
@@ -171,33 +181,57 @@ public class Terrain
     }
     return null;
   }
+
+  /**
+   * Required by IOnSceneTouchListener.
+   * The user touched the view, do something about it.
+   * 
+   * Returns true to represent the event was handled.
+   */
+  @Override
+  public boolean onSceneTouchEvent( final Scene scene, final TouchEvent event )
+  {
+    switch( event.getAction() )
+    {
+      case MotionEvent.ACTION_DOWN:
+        return false;
+      case MotionEvent.ACTION_UP:
+        handleSceneClick( event.getX(), event.getY() );
+        return true;
+      case MotionEvent.ACTION_MOVE:
+        return false;
+      default:
+        return false;
+    }
+  }
   
   /**
-   * Required by IClickDetectorListener
-   * 
    * The user clicked somewhere within the view,
    * figure out which game-object they clicked on,
    * and apply the appropriate actions from therein.
    */
-  @Override 
-  public void onClick( final ClickDetector pClickDetector,
-                       final int           pPointerID,
-                       final float         pSceneX,
-                       final float         pSceneY )
+  public void handleSceneClick( final float pSceneX,
+                                final float pSceneY )
   {
     final Coordinates here = new Coordinates( pSceneX, pSceneY );
     final TerrainTile tile = getTile( here );
 
+    final IGameObject it = currentlySelectedUnit;    // shorthand.
+
     // The thing we're applying out click against, if any.
     // ie. Targeting another tank to attack.
-    final IGameObject targetUnit = ( null == tile )? null : tile.occupant;
-    
-    final IGameObject it = currentlySelectedUnit;    // shorthand.
+    final IGameObject targetUnit = ( null == tile )?
+        null : ( it == tile.occupant )?
+        null : tile.occupant;
+
+Log.d( TAG, "targetUnit:"+ targetUnit );
+Log.d( TAG, "it:"+ it );
+Log.d( TAG, "tile:"+ tile );
+Log.d( TAG, "here:"+ here );
 
     //
     // Apply the appropriate implied action based on what we've clicked on.
     //
-
     if ( null != it )
     { 
       // TODO: Abstract this to allow different actions like "Healing" other units. -uly, 191213.
@@ -234,7 +268,7 @@ public class Terrain
     int rows    = TerrainTile.DEFAULT_MAX_ROWS;
     int columns = TerrainTile.DEFAULT_MAX_COLUMNS;
     // TODO: Different levels will have different tile sizes. -uly, 191213.
-        
+    
     for ( int idx = 0; idx < max; idx++ )
     {
       // Snap the coordinates to the tile.
