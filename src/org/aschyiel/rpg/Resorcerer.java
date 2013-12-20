@@ -35,6 +35,10 @@ public class Resorcerer
   private BaseGameActivity          gameActivity;
   private AssetManager              assets;
 
+  // Texture Regions.
+  private TiledTextureRegion tankTextureRegion;
+  private TiledTextureRegion terrainTileTextureRegion;
+
   //---------------------------------
   //
   // Chainable property setters.
@@ -71,7 +75,6 @@ public class Resorcerer
   //
   //---------------------------------
 
-  public TiledTextureRegion        tankTextureRegion;
   public RepeatingSpriteBackground grassBackground;
 
   /**
@@ -89,10 +92,18 @@ public class Resorcerer
         AssetBitmapTextureAtlasSource.create( assets, "gfx/background_grass.png" ),
         vertexBufferObjectManager );
 
-    atlas = new BitmapTextureAtlas( textureManager, 128, 128 );
+    // Make our atlas big enough to hold all of our textures.
+    atlas = new BitmapTextureAtlas( textureManager, 1024, 1024 );
 
-        tankTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
-            atlas, gameActivity, "tank1.png", 0, 0, 3, 4 ); 
+    // 96x128
+    tankTextureRegion        = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
+        atlas, gameActivity, "tank1.png",
+        0, 0, 3, 4 );
+
+    // 32x96
+    terrainTileTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
+        atlas, gameActivity, "terrain_tile.png",
+        0, 128, 1, 3 );
 
     // Finally, load all our stuff.
     atlas.load();
@@ -104,7 +115,17 @@ public class Resorcerer
   public AnimatedSprite getTankSprite()
   {
     return new AnimatedSprite( 10, 10, 48, 64,
-       tankTextureRegion, vertexBufferObjectManager );
+        tankTextureRegion, vertexBufferObjectManager );
    
   }
+
+  /**
+  * Returns a new terrain-tile sprite.
+  */
+  public AnimatedSprite getTerrainTileSprite()
+  {
+    return new AnimatedSprite( 0, 0, 
+        terrainTileTextureRegion, vertexBufferObjectManager );
+  }
+
 }

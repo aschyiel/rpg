@@ -126,6 +126,8 @@ public class Terrain
     tank.setCoords( new Coordinates( 50, 50 ) );
     scene.attachChild( tank.getSprite() );    // TODO: Abstract via controller.
 
+    setupTiles( scene );
+
     //
     // Add listeners.
     //
@@ -144,8 +146,6 @@ public class Terrain
   public void onPopulateScene( Scene scene, OnPopulateSceneCallback callback )
       throws Exception
   {
-    setupTiles();
-    
     callback.onPopulateSceneFinished();
   }
 
@@ -224,10 +224,10 @@ public class Terrain
         null : ( it == tile.occupant )?
         null : tile.occupant;
 
-Log.d( TAG, "targetUnit:"+ targetUnit );
-Log.d( TAG, "it:"+ it );
-Log.d( TAG, "tile:"+ tile );
-Log.d( TAG, "here:"+ here );
+    Log.d( TAG, "targetUnit:"+ targetUnit +", \n"+
+                "it:"+         it         +", \n"+
+                "tile:"+       tile       +", \n"+
+                "here:"+       here       +"." );
 
     //
     // Apply the appropriate implied action based on what we've clicked on.
@@ -261,7 +261,7 @@ Log.d( TAG, "here:"+ here );
    * Each tile is assigned an id indicating it's index.
    * Probably as an array.
    */
-  private void setupTiles()
+  private void setupTiles( Scene scene )
   {
     int l       = TerrainTile.SIZE;
     int max     = TerrainTile.DEFAULT_MAX_TILES;
@@ -269,12 +269,17 @@ Log.d( TAG, "here:"+ here );
     int columns = TerrainTile.DEFAULT_MAX_COLUMNS;
     // TODO: Different levels will have different tile sizes. -uly, 191213.
     
+    Log.d( TAG, "setup tiles, max:"+ max );
+    // TODO: Add another for loop for matrix.
     for ( int idx = 0; idx < max; idx++ )
     {
       // Snap the coordinates to the tile.
       int x = l * ( idx % columns );
       int y = l * ( idx % rows );
-      tiles.add( new TerrainTile( idx, x, y ) );
+      Log.d( TAG, "tile#"+ idx +": x:"+ x + ", y:"+ y );
+      TerrainTile tile = new TerrainTile( idx, x, y );
+      scene.attachChild( tile.gameObject.getSprite() );
+      tiles.add( tile );
     }
   }
   
@@ -304,6 +309,9 @@ Log.d( TAG, "here:"+ here );
      */
     public Coordinates coords;
 
+    /** The sprite representation for our tile. */
+    public IGameObject gameObject;
+
     /**
      * The width/height of a tile in coordinate-space units.
      */
@@ -313,6 +321,8 @@ Log.d( TAG, "here:"+ here );
     {
       this.id = id;
       this.coords = new Coordinates( x, y );
+      this.gameObject = plant.make( GameObjectType.TERRAIN_TILE );
+      this.gameObject.setCoords( this.coords );
     }
 
     /**

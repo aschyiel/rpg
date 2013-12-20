@@ -5,5 +5,6 @@ package org.aschyiel.rpg;
 */
 public enum GameObjectType
 {
-  TANK
+  TANK,
+  TERRAIN_TILE
 }

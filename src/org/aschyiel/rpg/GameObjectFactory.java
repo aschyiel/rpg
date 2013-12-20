@@ -27,6 +27,8 @@ public class GameObjectFactory
     {
       case TANK:
         return makeTank();
+      case TERRAIN_TILE:
+        return makeTerrainTile();
       default:
         throw new Error( "Oops! Unknown game-object type." );
     }
@@ -52,4 +54,14 @@ public class GameObjectFactory
     return tank;
   }
 
+  /**
+  * Returns a abstract game-object representing a single tile within the terrian view.
+  */
+  private IGameObject makeTerrainTile()
+  {
+    final IGameObject tile = new BaseGameObject();
+    tile.setCoords( DEFAULT_COORDS );
+    tile.setSprite( resorcerer.getTerrainTileSprite() );
+    return tile;
+  }
 }
