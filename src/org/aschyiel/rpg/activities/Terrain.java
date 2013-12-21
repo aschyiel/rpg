@@ -267,19 +267,25 @@ public class Terrain
     int max     = TerrainTile.DEFAULT_MAX_TILES;
     int rows    = TerrainTile.DEFAULT_MAX_ROWS;
     int columns = TerrainTile.DEFAULT_MAX_COLUMNS;
+
+    // The id is synonimous with the array index, I guess.
+    int id      = 0;
     // TODO: Different levels will have different tile sizes. -uly, 191213.
     
     Log.d( TAG, "setup tiles, max:"+ max );
-    // TODO: Add another for loop for matrix.
-    for ( int idx = 0; idx < max; idx++ )
+    for ( int i = 0; i < rows; i++ )
     {
-      // Snap the coordinates to the tile.
-      int x = l * ( idx % columns );
-      int y = l * ( idx % rows );
-      Log.d( TAG, "tile#"+ idx +": x:"+ x + ", y:"+ y );
-      TerrainTile tile = new TerrainTile( idx, x, y );
-      scene.attachChild( tile.gameObject.getSprite() );
-      tiles.add( tile );
+      for ( int j = 0; j < columns; j++ )
+      {
+        // Snap the coordinates to the tile.
+        int x = l * ( j % columns );
+        int y = l * i;
+        Log.d( TAG, "tile#"+ id +": x:"+ x + ", y:"+ y );
+        TerrainTile tile = new TerrainTile( id, x, y );
+        scene.attachChild( tile.gameObject.getSprite() );
+        tiles.add( tile );
+        id++;
+      }
     }
   }
   
