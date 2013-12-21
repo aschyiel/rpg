@@ -24,13 +24,10 @@ public class BaseGameObject
   /** Instantly update a game-object's position - for spawn-time use only. */
   public void setCoords( Coordinates coords )
   {
-    if ( null != _sprite && null != _coords ) {
-      _sprite.registerEntityModifier(
-          new MoveModifier( 0,
-                            _coords.getX(), coords.getX(),
-                            _coords.getY(), coords.getY() ) );
+    if ( null != _sprite )
+    {
+      _sprite.setPosition( coords.getX(), coords.getY() );
     }
-
     _coords = coords;
   }
 

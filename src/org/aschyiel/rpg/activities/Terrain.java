@@ -20,6 +20,7 @@ import org.andengine.entity.scene.IOnSceneTouchListener;
 import org.andengine.entity.scene.Scene;
 import org.andengine.entity.scene.background.RepeatingSpriteBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
+import org.andengine.entity.sprite.Sprite;
 import org.andengine.input.touch.TouchEvent;
 import org.andengine.input.touch.detector.ClickDetector;
 import org.andengine.input.touch.detector.ClickDetector.IClickDetectorListener;
@@ -124,7 +125,7 @@ public class Terrain
 
     plant = new GameObjectFactory( resorcerer );
     final IGameObject tank = plant.make( GameObjectType.TANK );
-    tank.setCoords( new Coordinates( 50, 50 ) );
+    tank.setCoords( new Coordinates( 0, 0 ) );
     scene.attachChild( tank.getSprite() );    // TODO: Abstract via controller.
 
     setupTiles( scene );
@@ -232,7 +233,7 @@ public class Terrain
         return false;
       default:
         return false;
-    }
+    } 
   }
   
   /**

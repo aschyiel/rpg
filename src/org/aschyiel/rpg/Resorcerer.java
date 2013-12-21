@@ -2,6 +2,8 @@ package org.aschyiel.rpg;
 
 import org.andengine.entity.scene.background.RepeatingSpriteBackground;
 import org.andengine.entity.sprite.AnimatedSprite;
+import org.andengine.entity.sprite.Sprite;
+import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
@@ -112,19 +114,18 @@ public class Resorcerer
   /**
    * Returns a new tank-sprite.
    */
-  public AnimatedSprite getTankSprite()
+  public Sprite getTankSprite()
   {
-    return new AnimatedSprite( 10, 10, 48, 64,
+    return new AnimatedSprite( 0, 0,
         tankTextureRegion, vertexBufferObjectManager );
-   
   }
 
   /**
   * Returns a new terrain-tile sprite.
   */
-  public AnimatedSprite getTerrainTileSprite()
+  public Sprite getTerrainTileSprite()
   {
-    return new AnimatedSprite( 0, 0, 
+    return new TiledSprite( 0, 0,
         terrainTileTextureRegion, vertexBufferObjectManager );
   }
 
