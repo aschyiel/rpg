@@ -178,7 +178,6 @@ public class Terrain
         // Snap the coordinates to the tile.
         int x = width * ( column % columns );
         int y = height * row ;
-        Log.d( TAG, "tile#"+ id +": x:"+ x + ", y:"+ y );
         TerrainTile tile = new TerrainTile( id, x, y );
         scene.attachChild( tile.gameObject.getSprite() );
         tiles.add( tile );
