@@ -2,6 +2,7 @@ package org.aschyiel.rpg.activities;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import android.os.Bundle; 
 import android.app.Activity;
@@ -152,34 +153,64 @@ public class Terrain
   /**
    * Our chess board.
    */
-  private Collection<TerrainTile> tiles = new ArrayList<TerrainTile>();
+  private List<TerrainTile> tiles = new ArrayList<TerrainTile>();
 
-  
+  /**
+   * Setup our chess board pieces;
+   * Each tile is assigned an id indicating it's index.
+   * Probably as an array.
+   */
+  private void setupTiles( Scene scene )
+  {
+    final int width   = TerrainTile.WIDTH;
+    final int height  = TerrainTile.HEIGHT;
+    final int rows    = TerrainTile.DEFAULT_MAX_ROWS;
+    final int columns = TerrainTile.DEFAULT_MAX_COLUMNS;
+
+    // The id is synonimous with the array index, I guess.
+    int id      = 0;
+    // TODO: Different levels will have different tile sizes? -uly, 191213.
+
+    for ( int column = 0; column < columns; column++ )
+    {
+      for ( int row = 0; row < rows; row++ )
+      {
+        // Snap the coordinates to the tile.
+        int x = width * ( column % columns );
+        int y = height * row ;
+        Log.d( TAG, "tile#"+ id +": x:"+ x + ", y:"+ y );
+        TerrainTile tile = new TerrainTile( id, x, y );
+        scene.attachChild( tile.gameObject.getSprite() );
+        tiles.add( tile );
+        id++;
+      }
+    }
+  }
+
   /**
    * Look up a terrain-tile based on the in-game coordinates. 
    */
   private TerrainTile getTile( Coordinates coords )
   {
-    final int l = TerrainTile.SIZE;
-    float x = coords.getX(); 
-    float y = coords.getY();
-    x -= x % l;    // Snap them to the tile coordinates.
-    y -= y % l;
+    final int w = TerrainTile.WIDTH;
+    final int h = TerrainTile.HEIGHT;
+    int x = (int) coords.getX();
+    int y = (int) coords.getY();
+    x -= x % w;    // Snap them to the tile coordinates.
+    y -= y % h;
     
-    Coordinates them;
-    for ( TerrainTile tile : tiles )
+    final int perCol = TerrainTile.DEFAULT_MAX_COLUMNS;
+    final int col = x / w;
+    final int row = y / h;
+    final int idx = ( row * perCol ) + col;
+    final TerrainTile tile = tiles.get( idx );
+    Log.d( TAG, "getTile:"+ tile );
+    if ( null == tile )
     {
-      them = tile.coords;
-      if ( them.getX()     >= x &&
-           them.getX() + l <= x &&
-           them.getY()     <= y &&
-           them.getY() + l <= y )
-      {
-        // If our coordinates takes place within a tile, then that's the one.
-        return tile;
-      }
+      throw new Error( "Something is fundamentally wrong here - "+
+                       "we failed to find a tile by coordinate!" );
     }
-    return null;
+    return tile;
   }
 
   /**
@@ -256,39 +287,6 @@ public class Terrain
                             targetUnit : null;
   }
 
-  /**
-   * Setup our chess board pieces;
-   * Each tile is assigned an id indicating it's index.
-   * Probably as an array.
-   */
-  private void setupTiles( Scene scene )
-  {
-    int l       = TerrainTile.SIZE;
-    int max     = TerrainTile.DEFAULT_MAX_TILES;
-    int rows    = TerrainTile.DEFAULT_MAX_ROWS;
-    int columns = TerrainTile.DEFAULT_MAX_COLUMNS;
-
-    // The id is synonimous with the array index, I guess.
-    int id      = 0;
-    // TODO: Different levels will have different tile sizes. -uly, 191213.
-    
-    Log.d( TAG, "setup tiles, max:"+ max );
-    for ( int i = 0; i < rows; i++ )
-    {
-      for ( int j = 0; j < columns; j++ )
-      {
-        // Snap the coordinates to the tile.
-        int x = l * ( j % columns );
-        int y = l * i;
-        Log.d( TAG, "tile#"+ id +": x:"+ x + ", y:"+ y );
-        TerrainTile tile = new TerrainTile( id, x, y );
-        scene.attachChild( tile.gameObject.getSprite() );
-        tiles.add( tile );
-        id++;
-      }
-    }
-  }
-  
   //-----------------------------------
   //
   // Private Inner Classes
@@ -316,12 +314,7 @@ public class Terrain
     public Coordinates coords;
 
     /** The sprite representation for our tile. */
-    public IGameObject gameObject;
-
-    /**
-     * The width/height of a tile in coordinate-space units.
-     */
-    public static final int SIZE = 32;
+    public IGameObject gameObject; 
 
     TerrainTile( int id, float x, float y )
     {
@@ -329,6 +322,12 @@ public class Terrain
       this.coords = new Coordinates( x, y );
       this.gameObject = plant.make( GameObjectType.TERRAIN_TILE );
       this.gameObject.setCoords( this.coords );
+    }
+
+    @Override
+    public String toString()
+    {
+      return "[Tile id:"+ id +", coords:"+ coords +"]";
     }
 
     /**
@@ -339,11 +338,16 @@ public class Terrain
      * a single square at a time.
      */
     public IGameObject occupant; 
-   
-    /** The default board size, modeled after (you guessed it) a chess board. */
-    public static final int DEFAULT_MAX_TILES   = 64;
-    public static final int DEFAULT_MAX_COLUMNS =  8;
-    public static final int DEFAULT_MAX_ROWS    =  8;
-  }
-  
+
+    // Should provide about 48x48 on 720x480.
+    public static final int DEFAULT_MAX_COLUMNS =  15;
+    public static final int DEFAULT_MAX_ROWS    =  10;
+
+    /** A terrain-tile width in (probably pixels?) scene coordinate units. */
+    public static final int WIDTH  = CAMERA_WIDTH / DEFAULT_MAX_COLUMNS;
+
+    /** A terrain-tile width in (probably pixels?) scene units. */
+    public static final int HEIGHT = CAMERA_HEIGHT / DEFAULT_MAX_ROWS;
+
+  } 
 }
