@@ -41,6 +41,15 @@ public class BaseGameObject
     // Set a course to move to our destination.
     // Periodically update our coordinates as we go.
     // Stop moving if we get blocked for some reason.
+
+    // ask for calculated path of queued tile movements.
+    // clear the previous moveQueue if any.
+    // update our UI to show that we're moving.
+    // - hide previous navigation points if any.
+    //   game.hideNav();
+    // - show navigation path with nav. points.
+    //   game.showNav( moveQueue );
+
   }
 
   public Sprite getSprite()

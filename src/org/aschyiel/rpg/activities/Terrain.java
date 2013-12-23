@@ -227,7 +227,7 @@ public class Terrain
       case MotionEvent.ACTION_DOWN:
         return false;
       case MotionEvent.ACTION_UP:
-        handleSceneClick( event.getX(), event.getY() );
+        handleActionUp( event.getX(), event.getY() );
         return true;
       case MotionEvent.ACTION_MOVE:
         return false;
@@ -241,7 +241,7 @@ public class Terrain
    * figure out which game-object they clicked on,
    * and apply the appropriate actions from therein.
    */
-  public void handleSceneClick( final float pSceneX,
+  public void handleActionUp( final float pSceneX,
                                 final float pSceneY )
   {
     final Coordinates here = new Coordinates( pSceneX, pSceneY );
@@ -278,13 +278,40 @@ public class Terrain
     }
 
     //
-    // Set the currently selected thing in preparation of
-    // the next click-handler iteration.
+    // Set focus to the "next" thing, if appropriate.
+    // ie. When attacking, keep our selection on the current tank, etc.
     //
 
     currentlySelectedUnit = ( null == targetUnit )?
-                            null       : ( it != targetUnit && targetUnit.isBelongToUs() )?
-                            targetUnit : null;
+                            currentlySelectedUnit : ( it != targetUnit && targetUnit.isBelongToUs() )?
+                            targetUnit : currentlySelectedUnit;
+    if ( null != currentlySelectedUnit )
+    {
+      setFocus( currentlySelectedUnit );
+    }
+  }
+
+  /**
+  * Keep track of the previously UI "focused" unit;
+  * This is only slightly different than the currently-selected unit.
+  */
+  private IGameObject previousFocus;
+
+  /**
+  * Set the next thing we're gonna focus;
+  * Only allow one thing at a time.
+  */
+  private void setFocus( IGameObject it )
+  {
+    if ( null != previousFocus && previousFocus != it )
+    {
+      previousFocus.unfocus();
+    }
+    if ( it != previousFocus )
+    {
+      it.focus();
+    }
+    previousFocus = it;
   }
 
   //-----------------------------------

@@ -48,4 +48,22 @@ public interface IGameObject
   * before attacking it based on it's available range, etc.
   */
   public void attack( IGameObject targetUnit );
+
+  /**
+  * Tell the unit to unfocus itself, and clean up it's focus-related UI.
+  * ie. Hide movement related navigational points, etc.
+  *
+  * Note: Only one game-object is allowed focus at a single instant;
+  *       not managed here.
+  */
+  public void unfocus();
+
+  /**
+  * Tell the unit to represent it's UI focus.
+  * Show navigational points, bring up stats on the HUD, etc.
+  *
+  * Note: Only one game-object is allowed focus at a single instant;
+  *       not managed here (x2).
+  */
+  public void focus();
 }

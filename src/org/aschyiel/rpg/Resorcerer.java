@@ -40,6 +40,7 @@ public class Resorcerer
   // Texture Regions.
   private TiledTextureRegion tankTextureRegion;
   private TiledTextureRegion terrainTileTextureRegion;
+  private TiledTextureRegion navPointTextureRegion;
 
   //---------------------------------
   //
@@ -98,17 +99,37 @@ public class Resorcerer
     atlas = new BitmapTextureAtlas( textureManager, 1024, 1024 );
 
     // 96x128
+    int y = 0;    // The current "height" index.
     tankTextureRegion        = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
         atlas, gameActivity, "tank1.png",
-        0, 0, 3, 4 );
+        0, y, 3, 4 );
+    y += 128;
 
     // 32x96
     terrainTileTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
         atlas, gameActivity, "terrain_tile.png",
-        0, 128, 1, 3 );
+        0, y, 1, 3 );
+    y += 32;
+
+    // 48x48
+    navPointTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
+        atlas, gameActivity, "nav_point.png"
+        0, y, 1, 1 );
+    y += 48;
 
     // Finally, load all our stuff.
     atlas.load();
+  }
+
+  /**
+  * Returns a navigation point sprite, which may or may not be new.
+  */
+  public Sprite getNavPointSprite( float x, float y )
+  {
+    // TODO support different navigation-point types,
+    //   ie. going left, various turnings, etc.
+    // TODO pool these. -uly, 221213
+    return new AnimatedSprite( x, y, navPointTextureRegion, vertexBufferObjectManager );
   }
 
   /**
