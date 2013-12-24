@@ -83,6 +83,20 @@ public class BaseGameObject
     // Attempt to deal damage to the target.
   }
 
+  @Override
+  public void unfocus()
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  @Override
+  public void focus()
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
   //--------------------------------
   //
   // Private Methods

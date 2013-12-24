@@ -113,7 +113,7 @@ public class Resorcerer
 
     // 48x48
     navPointTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
-        atlas, gameActivity, "nav_point.png"
+        atlas, gameActivity, "nav_point.png",
         0, y, 1, 1 );
     y += 48;
 

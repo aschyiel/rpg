@@ -169,7 +169,7 @@ public class Terrain
     final int columns = TerrainTile.DEFAULT_MAX_COLUMNS;
 
     // The id is synonimous with the array index, I guess.
-    int id      = 0;
+    int idx      = 0;
     // TODO: Different levels will have different tile sizes? -uly, 191213.
 
     for ( int column = 0; column < columns; column++ )
@@ -179,11 +179,25 @@ public class Terrain
         // Snap the coordinates to the tile.
         int x = width * ( column % columns );
         int y = height * row ;
-        TerrainTile tile = new TerrainTile( id, x, y );
+        TerrainTile tile = new TerrainTile( idx, x, y, row, column );
         scene.attachChild( tile.gameObject.getSprite() );
         tiles.add( tile );
-        id++;
+        idx++;
       }
+    }
+
+    //
+    // 2nd loop to hook-up all of the neighbor-references.
+    //
+
+    TerrainTile tile = null;
+    while ( 0 < idx-- )
+    {
+      tile = tiles.get( idx );
+      tile.top    = ( 0 == tile.row )?                  null : tiles.get( idx - rows );
+      tile.bottom = ( ( rows - 1 ) == tile.row )?       null : tiles.get( idx + rows );
+      tile.left   = ( 0 == tile.column )?               null : tiles.get( idx - 1 );
+      tile.right  = ( ( columns - 1 ) == tile.column )? null : tiles.get( idx + 1 );
     }
   }
 
@@ -343,12 +357,28 @@ public class Terrain
     /** The sprite representation for our tile. */
     public IGameObject gameObject; 
 
-    TerrainTile( int id, float x, float y )
+    /**
+    * Neighboring tile references.
+    */
+    public TerrainTile left;
+    public TerrainTile right;
+    public TerrainTile top;
+    public TerrainTile bottom;
+
+    /**
+    * Matrix positional information.
+    */
+    public int row    = -1;
+    public int column = -1;
+
+    TerrainTile( int id, float x, float y, int row, int column )
     {
       this.id = id;
       this.coords = new Coordinates( x, y );
       this.gameObject = plant.make( GameObjectType.TERRAIN_TILE );
       this.gameObject.setCoords( this.coords );
+      this.row    = row;
+      this.column = column;
     }
 
     @Override
