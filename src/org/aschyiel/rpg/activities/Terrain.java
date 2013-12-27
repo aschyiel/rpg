@@ -172,9 +172,9 @@ public class Terrain
     int idx      = 0;
     // TODO: Different levels will have different tile sizes? -uly, 191213.
 
-    for ( int column = 0; column < columns; column++ )
+    for ( int row = 0; row < rows; row++ )
     {
-      for ( int row = 0; row < rows; row++ )
+      for ( int column = 0; column < columns; column++ )
       {
         // Snap the coordinates to the tile.
         int x = width * ( column % columns );
