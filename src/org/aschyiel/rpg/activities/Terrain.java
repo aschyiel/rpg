@@ -124,11 +124,17 @@ public class Terrain
     scene.setBackground( resorcerer.grassBackground );
 
     plant = new GameObjectFactory( resorcerer );
+    setupTiles( scene );
+
+    //
+    // Temporarily setup a tank for testing purposes.
+    //
+
     final IGameObject tank = plant.make( GameObjectType.TANK );
     tank.setCoords( new Coordinates( 0, 0 ) );
     scene.attachChild( tank.getSprite() );    // TODO: Abstract via controller.
+    tiles.get( 0 ).occupant = tank;
 
-    setupTiles( scene );
 
     //
     // Add listeners.
