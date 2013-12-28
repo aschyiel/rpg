@@ -1,5 +1,7 @@
 package org.aschyiel.rpg;
 
+import org.aschyiel.rpg.activities.Terrain;
+
 /**
 * The game-object manufacturing plant.
 */
@@ -11,12 +13,14 @@ public class GameObjectFactory
 
   private static final Coordinates DEFAULT_COORDS = new Coordinates( 0, 0 );
 
-  public GameObjectFactory( Resorcerer resorcerer )
+  public GameObjectFactory( Terrain terrain, Resorcerer resorcerer )
   {
+    this.terrain    = terrain;
     this.resorcerer = resorcerer;
   }
 
   private Resorcerer resorcerer;
+  private Terrain    terrain;
 
   /**
   * Make something - to be called AFTER all resources have been loaded.
@@ -45,13 +49,14 @@ public class GameObjectFactory
   */
   private IGameObject makeTank()
   {
-    final IGameObject tank = new BaseGameObject();
+    final BaseGameObject tank = new BaseGameObject();
+    tank.setTerrain( terrain );
     tank.setCoords( DEFAULT_COORDS );
     tank.setSprite( resorcerer.getTankSprite() );
 
     // TODO: Set HP, attack, speed, range, other stats, etc.
 
-    return tank;
+    return (IGameObject) tank;
   }
 
   /**

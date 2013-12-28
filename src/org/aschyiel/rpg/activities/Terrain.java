@@ -32,6 +32,7 @@ import org.andengine.ui.activity.BaseGameActivity;
 
 import org.aschyiel.rpg.Coordinates;
 import org.aschyiel.rpg.IGameObject;
+import org.aschyiel.rpg.Movement;
 import org.aschyiel.rpg.Resorcerer;
 import org.aschyiel.rpg.GameObjectFactory;
 import org.aschyiel.rpg.GameObjectType;
@@ -39,13 +40,13 @@ import org.aschyiel.rpg.GameObjectType;
 /**
  * Written against AndEngine GLES2 
  * The terrain-view part of the game.
- *
+ * Singleton.
  */
 public class Terrain
     extends BaseGameActivity
     implements IOnSceneTouchListener
 {
-
+  
   //-----------------------------------
   //
   // Constants.
@@ -123,8 +124,9 @@ public class Terrain
     final Scene scene = new Scene();
     scene.setBackground( resorcerer.grassBackground );
 
-    plant = new GameObjectFactory( resorcerer );
+    plant = new GameObjectFactory( this, resorcerer );
     setupTiles( scene );
+    setupNavPointPool( scene );
 
     //
     // Temporarily setup a tank for testing purposes.
@@ -155,6 +157,28 @@ public class Terrain
       throws Exception
   {
     callback.onPopulateSceneFinished();
+  }
+
+  /**
+  * The maximum number of navigation points we're ever gonna need.
+  */
+  private static final int MAX_NAV_PTS =
+      TerrainTile.DEFAULT_MAX_ROWS * TerrainTile.DEFAULT_MAX_COLUMNS;
+
+  /**
+  * Populate our pool of nav. points - used in representing unit movements.
+  * To be called at init-time.
+  */
+  private void setupNavPointPool( Scene scene )
+  {
+    int i = MAX_NAV_PTS;
+    while ( 0 < i-- )
+    {
+      IGameObject nav = plant.make( GameObjectType.NAVIGATIONAL_POINT );
+      nav.getSprite.setVisible( false );
+      scene.attachChild( nav.getSprite() );
+      _navPointsPool.add( nav );
+    }
   }
 
   /**
@@ -212,16 +236,10 @@ public class Terrain
    */
   private TerrainTile getTile( Coordinates coords )
   {
-    final int w = TerrainTile.WIDTH;
-    final int h = TerrainTile.HEIGHT;
-    int x = (int) coords.getX();
-    int y = (int) coords.getY();
-    x -= x % w;    // Snap them to the tile coordinates.
-    y -= y % h;
-    
+    final Coordinates ohSnap = coords.getSnappedCoordinates();
     final int perCol = TerrainTile.DEFAULT_MAX_COLUMNS;
-    final int col = x / w;
-    final int row = y / h;
+    final int col = (int) ohSnap.getX() / TerrainTile.WIDTH;
+    final int row = (int) ohSnap.getY() / TerrainTile.HEIGHT;
     final int idx = ( row * perCol ) + col;
     final TerrainTile tile = tiles.get( idx );
     Log.d( TAG, "getTile:"+ tile );
@@ -289,7 +307,7 @@ public class Terrain
       boolean isMoving = null == targetUnit;
       if ( isMoving )
       {
-        it.move( here );
+        it.move( here.getSnappedCoordinates() );
       }
       else if ( null != targetUnit )
       {
@@ -336,7 +354,7 @@ public class Terrain
 
   //-----------------------------------
   //
-  // Private Inner Classes
+  // Public Inner Classes
   //
   //-----------------------------------
 
@@ -347,7 +365,7 @@ public class Terrain
    * Terrain-tiles are NOT to be rendered.  Things can be rendered where
    * terrain-tiles go, but the tiles themselves are to remain abstract.
    */
-  private class TerrainTile
+  public class TerrainTile
   {
     /**
      * The tile number corresponding to the tile array index.
@@ -412,5 +430,65 @@ public class Terrain
     /** A terrain-tile width in (probably pixels?) scene units. */
     public static final int HEIGHT = CAMERA_HEIGHT / DEFAULT_MAX_ROWS;
 
-  } 
+  }
+
+  /**
+  * Our HUD navigational points representing a unit's movement path.
+  */
+  private List<IGameObject> _navPoints = new ArrayList<IGameObject>();
+
+  /**
+  * A pool of available nav. points.
+  */
+  private List<IGameObject> _navPointsPool = new ArrayList<IGameObject>();
+
+  /**
+  * Hide the navigation-path is currently being displayed if any.
+  */
+  public void hideNavigation()
+  {
+    for ( IGameObject nav : _navPoints )
+    {
+      nav.getSprite().setVisible( false );
+    }
+    _navPoints.clear();
+  }
+
+  /**
+  * Display the navigation-path (usually for a unit) to the user.
+  */
+  public void showNavigation( List<Movement> moves )
+  {
+    IGameObject nav = null;
+    int i = 0;
+
+    for ( Movement move : moves )
+    {
+      nav = _navPointsPool.get( i++ );
+      // TODO Set the type of navigation-point to render here - per instance.
+      nav.setCoords( move.to );
+      nav.getSprite().setVisible( true );
+      _navPoints.add( nav );
+    }
+
+    // GOTCHA: set the entry point (a closure would be nice here, huh?).
+    nav = _navPointsPool.get( i++ );
+    // TODO Set the type of navigation-point to render here - per instance.
+    nav.setCoords( moves.get( 0 ).from );
+    nav.getSprite().setVisible( true );
+    _navPoints.add( nav );
+  }
+
+  public List<Movement> calculatePath( Coordinates _coords,
+      Coordinates destination )
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  //-----------------------------------
+  //
+  // Private Inner Classes
+  //
+  //----------------------------------- 
 }

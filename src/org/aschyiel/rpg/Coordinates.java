@@ -1,5 +1,7 @@
 package org.aschyiel.rpg;
 
+import org.aschyiel.rpg.activities.Terrain.TerrainTile;
+
 /**
  * Coordinates organize positional information relative to a view. 
  * 
@@ -61,5 +63,22 @@ public class Coordinates
   public String toString()
   {
     return "[ x:"+ x +", y:"+ y +" ]";
+  }
+
+  /**
+  * Returns the normalized coordinates that adhere to the tile placement
+  * via the top left corner of the tile).
+  *
+  * In other words - snap them to the tile coordinates.
+  */
+  public Coordinates getSnappedCoordinates()
+  {
+    final int w = TerrainTile.WIDTH;
+    final int h = TerrainTile.HEIGHT;
+    int x = (int) this.getX();
+    int y = (int) this.getY();
+    x -= x % w;
+    y -= y % h;
+    return new Coordinates( x, y );
   }
 }
