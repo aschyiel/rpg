@@ -124,7 +124,7 @@ public class Resorcerer
   /**
   * Returns a navigation point sprite, which may or may not be new.
   */
-  public Sprite getNavPointSprite( float x, float y )
+  public Sprite getNavigationalPointSprite( float x, float y )
   {
     // TODO support different navigation-point types,
     //   ie. going left, various turnings, etc.

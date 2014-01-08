@@ -33,6 +33,8 @@ public class GameObjectFactory
         return makeTank();
       case TERRAIN_TILE:
         return makeTerrainTile();
+      case NAVIGATIONAL_POINT:
+        return makeNavigationalPoint();
       default:
         throw new Error( "Oops! Unknown game-object type." );
     }
@@ -69,4 +71,17 @@ public class GameObjectFactory
     tile.setSprite( resorcerer.getTerrainTileSprite() );
     return tile;
   }
+
+  /**
+  * Creates an item representing a single nav-point;
+  * A collection of nav-points are used to represent a navigational-path.
+  */
+  private IGameObject makeNavigationalPoint()
+  {
+    final IGameObject navPoint = new BaseGameObject();
+    navPoint.setSprite( resorcerer.getNavigationalPointSprite() );
+    navPoint.getSprite.setVisible( false );    // Hidden by default.
+    return navPoint;
+  }
+
 }

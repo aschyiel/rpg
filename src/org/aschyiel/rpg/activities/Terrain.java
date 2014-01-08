@@ -175,7 +175,6 @@ public class Terrain
     while ( 0 < i-- )
     {
       IGameObject nav = plant.make( GameObjectType.NAVIGATIONAL_POINT );
-      nav.getSprite.setVisible( false );
       scene.attachChild( nav.getSprite() );
       _navPointsPool.add( nav );
     }
