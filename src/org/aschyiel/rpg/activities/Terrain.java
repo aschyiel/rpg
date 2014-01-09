@@ -489,7 +489,7 @@ public class Terrain
     // TODO: Accept movement rules/strategies.
     //   ie. for knights that move in an L,
     //   ie2. flying vehicles can probably move most places.
-    return SimpleMovementStrategy.calculatePath( origin, destination );
+    return NaiveMovementStrategy.calculatePath( origin, destination );
   }
 
   //-----------------------------------
