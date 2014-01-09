@@ -36,6 +36,7 @@ import org.aschyiel.rpg.Movement;
 import org.aschyiel.rpg.Resorcerer;
 import org.aschyiel.rpg.GameObjectFactory;
 import org.aschyiel.rpg.GameObjectType;
+import org.aschyiel.rpg.graphing.SimpleMovementStrategy;
 
 /**
  * Written against AndEngine GLES2 
@@ -434,7 +435,7 @@ public class Terrain
   /**
   * Our HUD navigational points representing a unit's movement path.
   */
-  private List<IGameObject> _navPoints = new ArrayList<IGameObject>();
+  private List<IGameObject> _visibleNavPoints = new ArrayList<IGameObject>();
 
   /**
   * A pool of available nav. points.
@@ -446,11 +447,11 @@ public class Terrain
   */
   public void hideNavigation()
   {
-    for ( IGameObject nav : _navPoints )
+    for ( IGameObject nav : _visibleNavPoints )
     {
       nav.getSprite().setVisible( false );
     }
-    _navPoints.clear();
+    _visibleNavPoints.clear();
   }
 
   /**
@@ -467,7 +468,7 @@ public class Terrain
       // TODO Set the type of navigation-point to render here - per instance.
       nav.setCoords( move.to );
       nav.getSprite().setVisible( true );
-      _navPoints.add( nav );
+      _visibleNavPoints.add( nav );
     }
 
     // GOTCHA: set the entry point (a closure would be nice here, huh?).
@@ -475,14 +476,20 @@ public class Terrain
     // TODO Set the type of navigation-point to render here - per instance.
     nav.setCoords( moves.get( 0 ).from );
     nav.getSprite().setVisible( true );
-    _navPoints.add( nav );
+    _visibleNavPoints.add( nav );
   }
 
-  public List<Movement> calculatePath( Coordinates _coords,
+  /**
+  * Calculate the movement path from point A to point B;
+  * aka a graphing problem.
+  */
+  public List<Movement> calculatePath( Coordinates origin,
       Coordinates destination )
   {
-    // TODO Auto-generated method stub
-    return null;
+    // TODO: Accept movement rules/strategies.
+    //   ie. for knights that move in an L,
+    //   ie2. flying vehicles can probably move most places.
+    return SimpleMovementStrategy.calculatePath( origin, destination );
   }
 
   //-----------------------------------
