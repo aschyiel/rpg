@@ -31,4 +31,12 @@ public class Vertex<T>
   {
     return place;
   }
+
+  /**
+  * Semantics.
+  */
+  public T getValue()
+  {
+    return getActualLocation();
+  }
 }
