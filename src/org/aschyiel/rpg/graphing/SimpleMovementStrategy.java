@@ -21,13 +21,13 @@ import org.aschyiel.rpg.Movement;
 * - Chapter 6, Skiena.
 * - Chapter 15.4, Shortest Path, Skiena.
 */
-public class NaiveMovementStrategy implements IMovementStrategy
+public class SimpleMovementStrategy<T> implements IMovementStrategy<T>
 {
   @Override
-  public List<Movement> calculatePath(
-      Vertex origin,
-      Vertex destination,
-      Graph  graph )
+  public static <T> List<Movement> calculatePath(
+      Vertex<T> origin,
+      Vertex<T> destination,
+      Graph<T>  graph )
   {
     // TODO Auto-generated method stub
     return null;

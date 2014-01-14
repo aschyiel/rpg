@@ -1,5 +1,7 @@
 package org.aschyiel.rpg.graphing;
 
+import java.util.Set;
+
 /**
 * A graph is a network of abstract in-game locations via edges and vertices.
 *

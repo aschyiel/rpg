@@ -36,7 +36,9 @@ import org.aschyiel.rpg.Movement;
 import org.aschyiel.rpg.Resorcerer;
 import org.aschyiel.rpg.GameObjectFactory;
 import org.aschyiel.rpg.GameObjectType;
+import org.aschyiel.rpg.graphing.Graph;
 import org.aschyiel.rpg.graphing.SimpleMovementStrategy;
+import org.aschyiel.rpg.graphing.Vertex;
 
 /**
  * Written against AndEngine GLES2 
@@ -483,13 +485,16 @@ public class Terrain
   * Calculate the movement path from point A to point B;
   * aka a graphing problem.
   */
-  public List<Movement> calculatePath( Coordinates origin,
-      Coordinates destination )
+  public List<Movement> calculatePath( Coordinates from,
+      Coordinates to )
   {
     // TODO: Accept movement rules/strategies.
     //   ie. for knights that move in an L,
     //   ie2. flying vehicles can probably move most places.
-    return NaiveMovementStrategy.calculatePath( origin, destination );
+    final Graph<TerrainTile> graph = getSimpleGraph();
+    final Vertex<TerrainTile> origin      = graph.getVertex( getTile( from ) );
+    final Vertex<TerrainTile> destination = graph.getVertex( getTile( to ) );
+    return SimpleMovementStrategy.<TerrainTile>calculatePath( origin, destination, graph );
   }
 
   //-----------------------------------

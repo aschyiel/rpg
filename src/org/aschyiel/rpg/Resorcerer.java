@@ -121,6 +121,11 @@ public class Resorcerer
     atlas.load();
   }
 
+  public Sprite getNavigationalPointSprite()
+  {
+    return getNavigationalPointSprite( 0, 0 );
+  }
+
   /**
   * Returns a navigation point sprite, which may or may not be new.
   */

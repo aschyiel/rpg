@@ -80,7 +80,7 @@ public class GameObjectFactory
   {
     final IGameObject navPoint = new BaseGameObject();
     navPoint.setSprite( resorcerer.getNavigationalPointSprite() );
-    navPoint.getSprite.setVisible( false );    // Hidden by default.
+    navPoint.getSprite().setVisible( false );    // Hidden by default.
     return navPoint;
   }
 
