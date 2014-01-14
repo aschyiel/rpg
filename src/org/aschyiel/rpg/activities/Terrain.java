@@ -2,7 +2,10 @@ package org.aschyiel.rpg.activities;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import android.os.Bundle; 
 import android.app.Activity;
@@ -36,6 +39,7 @@ import org.aschyiel.rpg.Movement;
 import org.aschyiel.rpg.Resorcerer;
 import org.aschyiel.rpg.GameObjectFactory;
 import org.aschyiel.rpg.GameObjectType;
+import org.aschyiel.rpg.graphing.Edge;
 import org.aschyiel.rpg.graphing.Graph;
 import org.aschyiel.rpg.graphing.SimpleMovementStrategy;
 import org.aschyiel.rpg.graphing.Vertex;
@@ -129,6 +133,7 @@ public class Terrain
 
     plant = new GameObjectFactory( this, resorcerer );
     setupTiles( scene );
+    setupGraphs();
     setupNavPointPool( scene );
 
     //
@@ -231,6 +236,57 @@ public class Terrain
       tile.left   = ( 0 == tile.column )?               null : tiles.get( idx - 1 );
       tile.right  = ( ( columns - 1 ) == tile.column )? null : tiles.get( idx + 1 );
     }
+  }
+
+  /**
+  * Organize the available movement paths based on the tiles.
+  */
+  private void setupGraphs()
+  {
+    setupSimpleGraph();
+  }
+
+  private Graph<TerrainTile> _simpleGraph;
+
+  /**
+  * Setup the simplest movement graph of left, right, up, down,
+  * by one space at a time.
+  */
+  private void setupSimpleGraph()
+  {
+    final Set<Vertex <TerrainTile>> vertices = new HashSet<Vertex <TerrainTile>>();
+    final HashMap<TerrainTile, Vertex <TerrainTile>> verticesByTile = new HashMap<TerrainTile, Vertex <TerrainTile>>();
+    for ( TerrainTile tile : tiles )
+    {
+      final Vertex<TerrainTile> vertex = new Vertex<TerrainTile>( tile );
+      vertices.add( vertex );
+      verticesByTile.put( tile, vertex );
+    }
+
+    final Set<Edge<TerrainTile>> edges = new HashSet<Edge <TerrainTile>>();
+    for ( TerrainTile tile : tiles )
+    {
+      // TODO: javaScript closures would be nice here... -uly, 130114
+      final Vertex<TerrainTile> from = verticesByTile.get( tile );
+      if ( null != tile.top )
+      {
+        edges.add( new Edge<TerrainTile>( from, verticesByTile.get( tile.top ) ) );
+      }
+      if ( null != tile.bottom )
+      {
+        edges.add( new Edge<TerrainTile>( from, verticesByTile.get( tile.bottom ) ) );
+      }
+      if ( null != tile.left )
+      {
+        edges.add( new Edge<TerrainTile>( from, verticesByTile.get( tile.left ) ) );
+      }
+      if ( null != tile.right )
+      {
+        edges.add( new Edge<TerrainTile>( from, verticesByTile.get( tile.right ) ) );
+      }
+    }
+
+    _simpleGraph = new Graph<TerrainTile>( vertices, edges );
   }
 
   /**
@@ -354,85 +410,6 @@ public class Terrain
     previousFocus = it;
   }
 
-  //-----------------------------------
-  //
-  // Public Inner Classes
-  //
-  //-----------------------------------
-
-  /**
-   * A unit of spatial representation; a chunk of the terrain view.
-   * Think of it as a single square on a chess board.
-   *
-   * Terrain-tiles are NOT to be rendered.  Things can be rendered where
-   * terrain-tiles go, but the tiles themselves are to remain abstract.
-   */
-  public class TerrainTile
-  {
-    /**
-     * The tile number corresponding to the tile array index.
-     */
-    public int id;
-
-    /**
-     * The "exact" location of this piece of tile.
-     * Useful for quickly placing units exactly within it's proper bounds.
-     */
-    public Coordinates coords;
-
-    /** The sprite representation for our tile. */
-    public IGameObject gameObject; 
-
-    /**
-    * Neighboring tile references.
-    */
-    public TerrainTile left;
-    public TerrainTile right;
-    public TerrainTile top;
-    public TerrainTile bottom;
-
-    /**
-    * Matrix positional information.
-    */
-    public int row    = -1;
-    public int column = -1;
-
-    TerrainTile( int id, float x, float y, int row, int column )
-    {
-      this.id = id;
-      this.coords = new Coordinates( x, y );
-      this.gameObject = plant.make( GameObjectType.TERRAIN_TILE );
-      this.gameObject.setCoords( this.coords );
-      this.row    = row;
-      this.column = column;
-    }
-
-    @Override
-    public String toString()
-    {
-      return "[Tile id:"+ id +", coords:"+ coords +"]";
-    }
-
-    /**
-     * The current occupant for a tile.
-     * There can only be a single thing standing on a tile at a time;
-     * 
-     * Again with the chess analogy, only a single pawn an occupy
-     * a single square at a time.
-     */
-    public IGameObject occupant; 
-
-    // Should provide about 48x48 on 720x480.
-    public static final int DEFAULT_MAX_COLUMNS =  15;
-    public static final int DEFAULT_MAX_ROWS    =  10;
-
-    /** A terrain-tile width in (probably pixels?) scene coordinate units. */
-    public static final int WIDTH  = CAMERA_WIDTH / DEFAULT_MAX_COLUMNS;
-
-    /** A terrain-tile width in (probably pixels?) scene units. */
-    public static final int HEIGHT = CAMERA_HEIGHT / DEFAULT_MAX_ROWS;
-
-  }
 
   /**
   * Our HUD navigational points representing a unit's movement path.
@@ -495,6 +472,91 @@ public class Terrain
     final Vertex<TerrainTile> origin      = graph.getVertex( getTile( from ) );
     final Vertex<TerrainTile> destination = graph.getVertex( getTile( to ) );
     return SimpleMovementStrategy.<TerrainTile>calculatePath( origin, destination, graph );
+  }
+
+  private Graph<TerrainTile> getSimpleGraph()
+  {
+    return _simpleGraph;
+  }
+
+  //-----------------------------------
+  //
+  // Public Inner Classes
+  //
+  //-----------------------------------
+
+  /**
+   * A unit of spatial representation; a chunk of the terrain view.
+   * Think of it as a single square on a chess board.
+   *
+   * Terrain-tiles are NOT to be rendered.  Things can be rendered where
+   * terrain-tiles go, but the tiles themselves are to remain abstract.
+   */
+  public class TerrainTile
+  {
+    /**
+     * The tile number corresponding to the tile array index.
+     */
+    public int id;
+
+    /**
+     * The "exact" location of this piece of tile.
+     * Useful for quickly placing units exactly within it's proper bounds.
+     */
+    public Coordinates coords;
+
+    /** The sprite representation for our tile. */
+    public IGameObject gameObject; 
+
+    /**
+    * Neighboring tile references.
+    */
+    public TerrainTile left   = null;
+    public TerrainTile right  = null;
+    public TerrainTile top    = null;
+    public TerrainTile bottom = null;
+
+    /**
+    * Matrix positional information.
+    */
+    public int row    = -1;
+    public int column = -1;
+
+    TerrainTile( int id, float x, float y, int row, int column )
+    {
+      this.id = id;
+      this.coords = new Coordinates( x, y );
+      this.gameObject = plant.make( GameObjectType.TERRAIN_TILE );
+      this.gameObject.setCoords( this.coords );
+      this.row    = row;
+      this.column = column;
+    }
+
+    @Override
+    public String toString()
+    {
+      return "[Tile id:"+ id +", coords:"+ coords +"]";
+    }
+
+    /**
+     * The current occupant for a tile.
+     * There can only be a single thing standing on a tile at a time;
+     * 
+     * Again with the chess analogy, only a single pawn an occupy
+     * a single square at a time.
+     */
+    public IGameObject occupant; 
+
+    // Should provide about 48x48 on 720x480.
+    public static final int DEFAULT_MAX_COLUMNS =  15;
+    public static final int DEFAULT_MAX_ROWS    =  10;
+
+    /** A terrain-tile width in (probably pixels?) scene coordinate units. */
+    public static final int WIDTH  = CAMERA_WIDTH / DEFAULT_MAX_COLUMNS;
+
+    /** A terrain-tile width in (probably pixels?) scene units. */
+    public static final int HEIGHT = CAMERA_HEIGHT / DEFAULT_MAX_ROWS;
+
   }
 
   //-----------------------------------
