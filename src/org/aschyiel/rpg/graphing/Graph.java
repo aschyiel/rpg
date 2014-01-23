@@ -43,4 +43,21 @@ public class Graph<T>
   {
     return verticesByValue.get( it );
   }
+
+  /**
+  * Returns a set of edges departing from a given vertex.
+  */
+  public Set<Edge<T>> getEdgesFrom( Vertex<T> from )
+  {
+    final Set<Vertex<T> edges = new HashSet<Vertex<T>>();
+    for ( Edge<T> edge : edges )
+    {
+      if ( from == edge.from )
+      {
+        edges.add( edge );
+      }
+    }
+    return edges;
+  }
+
 }
