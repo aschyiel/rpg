@@ -1,158 +1,59 @@
 package org.aschyiel.rpg;
 
-import org.andengine.entity.scene.background.RepeatingSpriteBackground;
-import org.andengine.entity.sprite.AnimatedSprite;
-import org.andengine.entity.sprite.Sprite;
-import org.andengine.entity.sprite.TiledSprite;
-import org.andengine.opengl.texture.TextureManager;
-import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
-import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
-import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
-import org.andengine.opengl.texture.region.TiledTextureRegion;
-import org.andengine.opengl.vbo.VertexBufferObjectManager;
-import org.andengine.ui.activity.BaseGameActivity;
-import org.aschyiel.rpg.activities.Terrain;
-
 import android.content.res.AssetManager;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.andengine.entity.scene.background.IBackground;
+import org.andengine.entity.scene.background.RepeatingSpriteBackground;
+import org.andengine.opengl.texture.TextureManager;
+import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
+import org.andengine.opengl.vbo.VertexBufferObjectManager;
+
+import org.aschyiel.rpg.activities.Terrain; 
+
 /**
-* The RPG Resource Manager organizes textures and things needed by
-* game-object as they get created by the game-object factory.
+* The resource management solution of good and NOT evil.
 *
-* Think of it as a simple hash-map full of goodies.
-*
-* A pseudo singleton for simplicity (for now at least).
+* Instantiation synonymous with BaseGameActivity#onCreateResources.
 */
 public class Resorcerer
 {
-  //---------------------------------
-  //
-  // Private Variables.
-  //
-  //---------------------------------
-
-  private VertexBufferObjectManager vertexBufferObjectManager;
-  private TextureManager            textureManager;
-  private BitmapTextureAtlas        atlas;
-  private BaseGameActivity          gameActivity;
-  private AssetManager              assets;
-
-  // Texture Regions.
-  private TiledTextureRegion tankTextureRegion;
-  private TiledTextureRegion terrainTileTextureRegion;
-  private TiledTextureRegion navPointTextureRegion;
-
-  //---------------------------------
-  //
-  // Chainable property setters.
-  //
-  //---------------------------------
-
-  public Resorcerer setVertexBufferObjectManager( VertexBufferObjectManager it )
-  {
-    vertexBufferObjectManager = it;
-    return this;
-  }
-
-  public Resorcerer setTextureManager( TextureManager it )
-  {
-    textureManager = it;
-    return this;
-  }
-
-  public Resorcerer setAssets( AssetManager it )
-  {
-    assets = it;
-    return this;
-  }
-
-  public Resorcerer setGameActivity( BaseGameActivity it )
-  {
-    gameActivity = it;
-    return this;
-  }
-
-  //---------------------------------
-  //
-  // Public properties by name - we don't need no stinking getters.
-  //
-  //---------------------------------
-
-  public RepeatingSpriteBackground grassBackground;
-
+  private TextureManager tex;
+  private VertexBufferObjectManager buffy;
+  private AssetManager missy;
+  private Terrain tera;
+  
   /**
-  * Setup our graphics, etc.
-  * To be called by the parent game-activity when it's onCreateResources happens.
-  */
-  public void onCreateResources()
-  {
-    // GOTCHA: Assumes that "gfx/" is already set as our base-path.
-
-    grassBackground = new RepeatingSpriteBackground(
-        Terrain.CAMERA_WIDTH,
-        Terrain.CAMERA_HEIGHT,
-        textureManager,
-        AssetBitmapTextureAtlasSource.create( assets, "gfx/background_grass.png" ),
-        vertexBufferObjectManager );
-
-    // Make our atlas big enough to hold all of our textures.
-    atlas = new BitmapTextureAtlas( textureManager, 1024, 1024 );
-
-    // 96x128
-    int y = 0;    // The current "height" index.
-    tankTextureRegion        = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
-        atlas, gameActivity, "tank1.png",
-        0, y, 3, 4 );
-    y += 128;
-
-    // 32x96
-    terrainTileTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
-        atlas, gameActivity, "terrain_tile.png",
-        0, y, 1, 3 );
-    y += 32;
-
-    // 48x48
-    navPointTextureRegion = BitmapTextureAtlasTextureRegionFactory.createTiledFromAsset(
-        atlas, gameActivity, "nav_point.png",
-        0, y, 1, 1 );
-    y += 48;
-
-    // Finally, load all our stuff.
-    atlas.load();
-  }
-
-  public Sprite getNavigationalPointSprite()
-  {
-    return getNavigationalPointSprite( 0, 0 );
-  }
-
-  /**
-  * Returns a navigation point sprite, which may or may not be new.
-  */
-  public Sprite getNavigationalPointSprite( float x, float y )
-  {
-    // TODO support different navigation-point types,
-    //   ie. going left, various turnings, etc.
-    // TODO pool these. -uly, 221213
-    return new AnimatedSprite( x, y, navPointTextureRegion, vertexBufferObjectManager );
-  }
-
-  /**
-   * Returns a new tank-sprite.
+   * Named backgrounds - ie. the "grass-background".
    */
-  public Sprite getTankSprite()
-  {
-    return new AnimatedSprite( 0, 0,
-        tankTextureRegion, vertexBufferObjectManager );
-  }
+  public Map<String, IBackground> backgrounds;
 
+  public Resorcerer( Terrain tera )
+  {
+    // Assign references.
+    this.tera = tera;
+    tex       = tera.getTextureManager();
+    buffy     = tera.getVertexBufferObjectManager();
+    missy     = tera.getAssets(); 
+    
+    // Build-up backgrounds.
+    backgrounds = new HashMap<String, IBackground>(); 
+    backgrounds.put( "grass", bg( "gfx/background_grass.png" ) ); 
+    
+  }
+  
   /**
-  * Returns a new terrain-tile sprite.
-  */
-  public Sprite getTerrainTileSprite()
-  {
-    return new TiledSprite( 0, 0,
-        terrainTileTextureRegion, vertexBufferObjectManager );
+   * Makes a repeating background of sorts. 
+   */
+  private IBackground bg( String path )
+  { 
+    return new RepeatingSpriteBackground(
+        tera.CAMERA_WIDTH,
+        tera.CAMERA_HEIGHT,
+        tex,
+        AssetBitmapTextureAtlasSource.create( missy, path ),
+        buffy );
   }
-
 }
