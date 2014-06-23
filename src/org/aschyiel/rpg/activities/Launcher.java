@@ -7,162 +7,71 @@ import org.aschyiel.rpg.R;
 import org.andengine.AndEngine;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.ExpandableListActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ExpandableListView;
-import android.widget.Toast;
 
 /**
- * The launcher for the game - the very first activity the user willl see.. 
+ * The launcher for the game - dictates the first activity we're going to show the user.
  *
+ * A lot of the format is copied-off of the AndEngine style for writing a launcher.
  */
-public class Launcher extends Activity {
-	// ===========================================================
-	// Constants
-	// ===========================================================
+public class Launcher extends Activity
+{
 
-	private static final String PREF_LAST_APP_LAUNCH_VERSIONCODE_ID = "last.app.launch.versioncode";
+  private static final String PREF_LAST_APP_LAUNCH_VERSIONCODE_ID = "last.app.launch.versioncode";
 
-	private static final int DIALOG_FIRST_APP_LAUNCH = 0;
-	private static final int DIALOG_NEW_IN_THIS_VERSION      = 1 + Launcher.DIALOG_FIRST_APP_LAUNCH;
-	private static final int DIALOG_DEVICE_NOT_SUPPORTED     = 1 + Launcher.DIALOG_NEW_IN_THIS_VERSION;
+  private static final int DIALOG_FIRST_APP_LAUNCH     = 0;
+  private static final int DIALOG_NEW_IN_THIS_VERSION  = 1 + Launcher.DIALOG_FIRST_APP_LAUNCH;
+  private static final int DIALOG_DEVICE_NOT_SUPPORTED = 1 + Launcher.DIALOG_NEW_IN_THIS_VERSION; 
 
-	// ===========================================================
-	// Fields
-	// ===========================================================
+  @SuppressWarnings( "deprecation" )
+  @Override
+  public void onCreate( final Bundle savedInstanceState )
+  {
+    super.onCreate( savedInstanceState );
 
-	private int previousVersion;
-	
-	// ===========================================================
-	// Constructors
-	// ===========================================================
+    if( !AndEngine.isDeviceSupported() )
+    {
+      this.showDialog( Launcher.DIALOG_DEVICE_NOT_SUPPORTED );
+    }
 
-	@Override
-	public void onCreate( final Bundle savedInstanceState ) {
-		super.onCreate( savedInstanceState );
+    setContentView( R.layout.activity_launcher );
 
-		if( !AndEngine.isDeviceSupported() )
-		{
-			this.showDialog(Launcher.DIALOG_DEVICE_NOT_SUPPORTED);
-		}
+    final SharedPreferences prefs = this.getPreferences( Context.MODE_PRIVATE );
 
-		setContentView( R.layout.activity_launcher ); 
+    int currentVersion = this.getVersionCode();
+    prefs.edit().putInt( Launcher.PREF_LAST_APP_LAUNCH_VERSIONCODE_ID, currentVersion ).commit();
 
-		final SharedPreferences prefs = this.getPreferences( Context.MODE_PRIVATE );
+    launchNextActivity();
+  }
 
-		int currentVersion = this.getVersionCode();
-		int previousVersion = prefs.getInt( Launcher.PREF_LAST_APP_LAUNCH_VERSIONCODE_ID, -1 );
+  /**
+  * Figure out what activity we're going to launch next.
+  * ie. the start-menu, vs. resuming?, etc.
+  */
+  public void launchNextActivity()
+  {
+    // TODO: For dev purposes, jump directly into the game environment.
+    startActivity( new Intent( this, org.aschyiel.rpg.activities.Terrain.class ) );
+  }
 
-		if ( isFirstTime( "first.app.launch" ) )
-		{
-		  //this.showDialog( ExampleLauncher.DIALOG_FIRST_APP_LAUNCH );
-		}
-		else if ( -1 != previousVersion && ( previousVersion < currentVersion ) )
-		{
-			//this.showDialog( ExampleLauncher.DIALOG_NEW_IN_THIS_VERSION );
-		}
-
-		prefs.edit().putInt( Launcher.PREF_LAST_APP_LAUNCH_VERSIONCODE_ID, currentVersion ).commit();
-	
-		// TODO
-		launchTerrainActivity();
-	}
-
-	// ===========================================================
-	// Getter & Setter
-	// ===========================================================
-
-	// ===========================================================
-	// Methods for/from SuperClass/Interfaces
-	// ===========================================================
-
-	@Override
-	protected Dialog onCreateDialog(final int pId) {
-		switch(pId) {
-			case DIALOG_DEVICE_NOT_SUPPORTED:
-				return new AlertDialog.Builder(this)
-					.setTitle(R.string.dialog_device_not_supported_title)
-					.setMessage(R.string.dialog_device_not_supported_message)
-					.setIcon(android.R.drawable.ic_dialog_alert)
-					.setPositiveButton(android.R.string.ok, null)
-					.create();
-			case DIALOG_FIRST_APP_LAUNCH:
-				return new AlertDialog.Builder(this)
-					.setTitle(R.string.dialog_first_app_launch_title)
-					.setMessage(R.string.dialog_first_app_launch_message)
-					.setIcon(android.R.drawable.ic_dialog_info)
-					.setPositiveButton(android.R.string.ok, null)
-					.create();
-			case DIALOG_NEW_IN_THIS_VERSION:
-				final int[] versionCodes = this.getResources().getIntArray(R.array.new_in_version_versioncode);
-				final int versionDescriptionsStartIndex = Math.max(0, Arrays.binarySearch(versionCodes, previousVersion) + 1);
-
-				final String[] versionDescriptions = this.getResources().getStringArray(R.array.new_in_version_changes);
-
-				final StringBuilder sb = new StringBuilder();
-				for(int i = versionDescriptions.length - 1; i >= versionDescriptionsStartIndex; i--) {
-					sb.append("--------------------------\n");
-					sb.append(">>>  Version: " + versionCodes[i] + "\n");
-					sb.append("--------------------------\n");
-					sb.append(versionDescriptions[i]);
-
-					if(i > versionDescriptionsStartIndex){
-						sb.append("\n\n");
-					}
-				}
-
-				return new AlertDialog.Builder(this)
-					.setTitle(R.string.dialog_new_in_this_version_title)
-					.setMessage(sb.toString())
-					.setIcon(android.R.drawable.ic_dialog_info)
-					.setPositiveButton(android.R.string.ok, null)
-					.create();
-			default:
-				return super.onCreateDialog(pId);
-		}
-	}
-
-	/**
-	* Launch the main terrain activity.
-	*/
-	public void launchTerrainActivity()
-	{
-		startActivity( new Intent( this, org.aschyiel.rpg.activities.Terrain.class ) ); 
-	}
-
-	// ===========================================================
-	// Methods
-	// ===========================================================
-
-	public boolean isFirstTime(final String pKey){
-		final SharedPreferences prefs = this.getPreferences(Context.MODE_PRIVATE);
-		if(prefs.getBoolean(pKey, true)){
-			prefs.edit().putBoolean(pKey, false).commit();
-			return true;
-		}
-		return false;
-	}
-
-	public int getVersionCode() {
-		try {
-			final PackageInfo pi = this.getPackageManager().getPackageInfo(this.getPackageName(), 0);
-			return pi.versionCode;
-		} catch (final PackageManager.NameNotFoundException e) {
-			return -1;
-		}
-	}
-
-	// ===========================================================
-	// Inner and Anonymous Classes
-	// ===========================================================
+  /**
+  * Returns the current-version of the code, if any.
+  */
+  public int getVersionCode()
+  {
+    try
+    {
+      final PackageInfo pi = this.getPackageManager().getPackageInfo( this.getPackageName(), 0 );
+      return pi.versionCode;
+    }
+    catch ( final PackageManager.NameNotFoundException e )
+    {
+      return -1;
+    }
+  }
 }
