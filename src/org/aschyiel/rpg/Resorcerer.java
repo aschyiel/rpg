@@ -13,8 +13,8 @@ import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegion
 import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
-
 import org.aschyiel.rpg.activities.Terrain; 
+import org.aschyiel.rpg.level.BackgroundType;
 
 /**
 * The resource management solution of good and NOT evil.
@@ -36,12 +36,12 @@ public class Resorcerer
   /**
    * Named backgrounds - ie. the "grass-background".
    */
-  public Map<String, IBackground> backgrounds;
+  private final Map<String, IBackground> backgrounds;
 
   /**
   * Named tile texture-regions (within the texture-atlas).
   */
-  public Map<String, TiledTextureRegion> tiles;
+  private final Map<String, TiledTextureRegion> textures;
 
   public Resorcerer( Terrain tera )
   {
@@ -56,8 +56,30 @@ public class Resorcerer
     backgrounds.put( "grass", bg( "gfx/background_grass.png" ) );
 
     // Build-up tile-textures.
-    tiles = new HashMap<String, TiledTextureRegion>();
+    textures = new HashMap<String, TiledTextureRegion>();
     setupTextureAtlas();
+  }
+
+  public TiledTextureRegion getUnitTexture( GameObject it )
+  {
+    // TODO: Allow unit differentiation based on the owner (ie. blue tanks
+    //   for player1, red tanks for player2, etc.).
+    return getTexture( it.getUnitType().toString() );
+  }
+
+  public TiledTextureRegion getTexture( String name )
+  {
+    return textures.get( name );
+  }
+
+  public IBackground getBackground( BackgroundType bg )
+  {
+    return backgrounds.get( bg.name );
+  }
+
+  public VertexBufferObjectManager getVertexBufferObjectManager()
+  {
+    return buffy;
   }
 
   /**
@@ -66,9 +88,9 @@ public class Resorcerer
   private void setupTextureAtlas()
   {
     atlas = new BitmapTextureAtlas( tex, 1024, 1024 );
-    tiles.put( "tank1",        tile( "tank1.png",        3, 4, 128 ) );    // 96x128
-    tiles.put( "terrain_tile", tile( "terrain_tile.png", 1, 3,  32 ) );    // 32x96
-    tiles.put( "nav_point",    tile( "nav_point.png",    1, 1,  48 ) );    // 48x48
+    textures.put( "tank",         tile( "tank1.png",        3, 4, 128 ) );    // 96x128
+    textures.put( "terrain_tile", tile( "terrain_tile.png", 1, 3,  32 ) );    // 32x96
+    textures.put( "nav_point",    tile( "nav_point.png",    1, 1,  48 ) );    // 48x48
     atlas.load();    //..last!..
   }
 

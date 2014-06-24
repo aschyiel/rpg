@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
 import android.os.Bundle; 
@@ -32,7 +33,11 @@ import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegion
 import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.ui.activity.BaseGameActivity;
+import org.aschyiel.rpg.GameObject;
+import org.aschyiel.rpg.GameObjectFactory;
 import org.aschyiel.rpg.Resorcerer;
+import org.aschyiel.rpg.graph.ChessBoard;
+import org.aschyiel.rpg.level.BackgroundType;
 import org.aschyiel.rpg.level.Level;
 import org.aschyiel.rpg.level.LevelDetail;
 import org.aschyiel.rpg.level.Player;
@@ -66,10 +71,12 @@ public class Terrain
 
   private ClickDetector clickDetector;
   private Camera cam;
+  private ChessBoard board;
+  private GameObjectFactory plant;
 
   //-----------------------------------
   //
-  // Overriden Methods
+  // Overridden Methods
   //
   //----------------------------------- 
 
@@ -97,6 +104,7 @@ public class Terrain
   {
     BitmapTextureAtlasTextureRegionFactory.setAssetBasePath( "gfx/" );
     rez = new Resorcerer( this );
+    plant = new GameObjectFactory( rez );
     callback.onCreateResourcesFinished();
   }
   
@@ -113,16 +121,19 @@ public class Terrain
   public void onPopulateScene( Scene scene, OnPopulateSceneCallback callback )
       throws Exception
   {
+    Level lvl = getLevelInfo();
+
+    board = new ChessBoard();
+
     // TOOD:
     //   1. Populate units.
     //   2. Connect tiles.
     //   3. Render tiles based on level design.
-    scene.setBackground( rez.backgrounds.get( "grass" ) );
+    scene.setBackground( rez.getBackground( BackgroundType.GRASS ) );
 
-    Level lvl = getLevelInfo();
+    instantiateUnits( lvl.getUnitsIterator() );
 
-
-    callback.onPopulateSceneFinished();
+    callback.onPopulateSceneFinished();    //..last..
   }
 
   @Override
@@ -140,9 +151,19 @@ public class Terrain
   {
     // TODO: Check who's playing, what they're using, and serialize the level appropriately...
     Level lvl = new Level();
-    lvl.units.add( new LevelDetail( UnitType.TANK, 0, 0, Player.ONE ) );
-    lvl.units.add( new LevelDetail( UnitType.TANK, 2, 4, Player.CPU ) );
+    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 0, 0, Player.ONE ) );
+    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 2, 4, Player.CPU ) );
     return lvl;
+  }
+
+  private void instantiateUnits( ListIterator<LevelDetail> it )
+  {
+    while ( it.hasNext() )
+    {
+      LevelDetail details = it.next();
+      GameObject unit = plant.makeUnit( details.getUnitType(), details.getOwner() );
+      board.placeUnit( unit, details.getRow(), details.getColumn() );
+    }
   }
 
 }

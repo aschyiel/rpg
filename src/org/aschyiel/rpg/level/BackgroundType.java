@@ -1,15 +1,12 @@
 package org.aschyiel.rpg.level;
 
-/**
-* Describes the valid unit-types that can be placed within a level.
-*/
-public enum UnitType
+public enum BackgroundType
 {
-  TANK( "TANK" );
-
+  GRASS( "GRASS" );
+  
   private final String name;
-
-  UnitType( String name )
+  
+  BackgroundType( String name )
   {
     this.name = name;
   }
