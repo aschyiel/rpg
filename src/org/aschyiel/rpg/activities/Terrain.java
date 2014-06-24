@@ -32,8 +32,11 @@ import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegion
 import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.ui.activity.BaseGameActivity;
-
 import org.aschyiel.rpg.Resorcerer;
+import org.aschyiel.rpg.level.Level;
+import org.aschyiel.rpg.level.LevelDetail;
+import org.aschyiel.rpg.level.Player;
+import org.aschyiel.rpg.level.UnitType;
 
 /**
 * A terrain is like a chess-board, full of tiles (squares),
@@ -115,6 +118,10 @@ public class Terrain
     //   2. Connect tiles.
     //   3. Render tiles based on level design.
     scene.setBackground( rez.backgrounds.get( "grass" ) );
+
+    Level lvl = getLevelInfo();
+
+
     callback.onPopulateSceneFinished();
   }
 
@@ -123,6 +130,19 @@ public class Terrain
   {
     // TODO Auto-generated method stub
     return false;
+  }
+
+  /**
+  * Returns a description on how to setup the next level of terrain,
+  * where to place units, etc.
+  */
+  private Level getLevelInfo()
+  {
+    // TODO: Check who's playing, what they're using, and serialize the level appropriately...
+    Level lvl = new Level();
+    lvl.units.add( new LevelDetail( UnitType.TANK, 0, 0, Player.ONE ) );
+    lvl.units.add( new LevelDetail( UnitType.TANK, 2, 4, Player.CPU ) );
+    return lvl;
   }
 
 }
