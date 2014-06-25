@@ -123,7 +123,7 @@ public class Terrain
   {
     Level lvl = getLevelInfo();
 
-    board = new ChessBoard();
+    board = new ChessBoard( lvl.getBoardRows(), lvl.getBoardColumns() );
 
     // TOOD:
     //   1. Populate units.
