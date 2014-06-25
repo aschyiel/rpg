@@ -47,5 +47,11 @@ public class GameObject
     return unitType;
   }
 
+  public Integer getId()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
   
 }

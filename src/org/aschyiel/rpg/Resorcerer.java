@@ -74,7 +74,7 @@ public class Resorcerer
 
   public IBackground getBackground( BackgroundType bg )
   {
-    return backgrounds.get( bg.name );
+    return backgrounds.get( bg.toString() );
   }
 
   public VertexBufferObjectManager getVertexBufferObjectManager()

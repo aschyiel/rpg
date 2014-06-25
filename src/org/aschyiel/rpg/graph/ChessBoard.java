@@ -1,5 +1,8 @@
 package org.aschyiel.rpg.graph;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.aschyiel.rpg.GameObject;
 
 /**
@@ -26,6 +29,7 @@ public class ChessBoard
     this.rows    = rows;
     this.columns = columns;
     squaresByUnit = new HashMap<Integer, Square>();
+    squares = new Square[rows][columns];
 
     setupVertices();
     setupEdges();
@@ -36,6 +40,14 @@ public class ChessBoard
     Square sq = squares[row][col];
     sq.occupy( unit );
   }
+  
+  /** 
+   * The corollary of ChessBoard#placeUnit. 
+   */
+  public GameObject removeUnit( int row, int col )
+  {
+    return squares[row][col].unoccupy();
+  }
 
   /**
   * A reverse lookup capability --- managed via Square#occupy et al.
@@ -43,9 +55,9 @@ public class ChessBoard
   */
   private final Map<Integer, Square> squaresByUnit;
 
-  private findSquare( GameObject unit )
+  private Square findSquare( GameObject unit )
   {
-    return squaresByUnit.get( unit.id );
+    return squaresByUnit.get( unit.getId() );
   }
 
   /**
@@ -53,7 +65,6 @@ public class ChessBoard
   */
   private void setupVertices()
   {
-    squares = new Square[rows][columns];
     boolean isColoured = false;    // flip back-and-forth between white vs. black.
     for ( int row = 0; row < rows; row++ )
     {
@@ -96,10 +107,10 @@ public class ChessBoard
     protected final int column;
 
     /** Friendly neighbors. */
-    protected final Square up;
-    protected final Square down;
-    protected final Square left;
-    protected final Square right;
+    protected Square up;
+    protected Square down;
+    protected Square left;
+    protected Square right;
 
     /**
     * Think alternating white vs. black squares in a chess-board.
@@ -107,7 +118,7 @@ public class ChessBoard
     protected final boolean isColoured;
 
     /** The current occupant of the square (changes). */
-    private GameObject = null;
+    private GameObject occupant = null;
 
     Square( int row, int column, boolean isColoured )
     {
@@ -129,7 +140,7 @@ public class ChessBoard
         throw new RuntimeException( "NPE - Invalid occupant for square." );
       }
       occupant = unit;
-      squaresByUnit.set( unit.id, this );
+      squaresByUnit.put( unit.getId(), this );
     }
 
     /**
@@ -139,7 +150,7 @@ public class ChessBoard
     {
       GameObject unit = occupant;
       occupant = null;
-      squaresByUnit.set( unit.id, null );
+      squaresByUnit.put( unit.getId(), null );
       return unit;
     }
 
