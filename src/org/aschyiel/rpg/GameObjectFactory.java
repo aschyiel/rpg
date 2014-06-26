@@ -14,6 +14,8 @@ public class GameObjectFactory
   private final Resorcerer rez;
   private final VertexBufferObjectManager buffy;
 
+  private int nextId = 1;
+
   public GameObjectFactory( Resorcerer rez )
   {
     this.rez = rez;
@@ -25,7 +27,7 @@ public class GameObjectFactory
   */
   public GameObject makeUnit( UnitType unitType, Player owner )
   {
-    GameObject unit = new GameObject( unitType, owner );
+    GameObject unit = new GameObject( unitType, owner, nextId++ );
     switch( unitType )
     {
       case TANK:

@@ -33,6 +33,7 @@ import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegion
 import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.ui.activity.BaseGameActivity;
+import org.aschyiel.rpg.Coords;
 import org.aschyiel.rpg.GameObject;
 import org.aschyiel.rpg.GameObjectFactory;
 import org.aschyiel.rpg.Resorcerer;
@@ -87,7 +88,7 @@ public class Terrain
     final Display display = getWindowManager().getDefaultDisplay();
     return new EngineOptions(
         true,
-        ScreenOrientation.LANDSCAPE_SENSOR,
+        ScreenOrientation.LANDSCAPE_FIXED,
         new RatioResolutionPolicy( display.getWidth(), display.getHeight() ),
         cam );
   }
@@ -125,6 +126,10 @@ public class Terrain
 
     board = new ChessBoard( lvl.getBoardRows(), lvl.getBoardColumns() );
 
+    // Needed for translating board vs. canvas space.
+    rowHeight   = CAMERA_HEIGHT / lvl.getBoardRows();
+    columnWidth = CAMERA_WIDTH  / lvl.getBoardColumns();
+
     // TOOD:
     //   1. Populate units.
     //   2. Connect tiles.
@@ -133,6 +138,10 @@ public class Terrain
 
     instantiateUnits( lvl.getUnitsIterator() );
 
+    // TODO:
+    //   Need to map squares to pixels inorder to place sprites.
+    //   
+    
     callback.onPopulateSceneFinished();    //..last..
   }
 
@@ -162,8 +171,21 @@ public class Terrain
     {
       LevelDetail details = it.next();
       GameObject unit = plant.makeUnit( details.getUnitType(), details.getOwner() );
-      board.placeUnit( unit, details.getRow(), details.getColumn() );
+      int m = details.getColumn();
+      int n = details.getRow();
+      board.placeUnit( unit, m, n );
+      unit.setPosition( asCoords( m, n ) );
     }
   }
+
+  /**
+  * Translate boards-squares (rows and columns) into AndEngine pixels.
+  */
+  private Coords asCoords( int m, int n )
+  {
+    return new Coords( n * columnWidth, m * rowHeight );
+  }
+  private Integer rowHeight;
+  private Integer columnWidth;
 
 }

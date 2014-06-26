@@ -11,11 +11,15 @@ public class GameObject
 {
   private final Player owner;
   private final UnitType unitType;
+  private final int id;
 
-  public GameObject( UnitType unitType, Player owner )
+  private Sprite sprite;
+
+  public GameObject( UnitType unitType, Player owner, int id )
   {
     this.unitType = unitType;
     this.owner    = owner;
+    this.id       = id;
   }
 
   public void setHealth(int i)
@@ -36,10 +40,9 @@ public class GameObject
     
   }
 
-  public void setSprite(Sprite sprite)
+  public void setSprite( Sprite sprite )
   {
-    // TODO Auto-generated method stub
-    
+    this.sprite = sprite;
   }
 
   public Object getUnitType()
@@ -49,9 +52,17 @@ public class GameObject
 
   public Integer getId()
   {
-    // TODO Auto-generated method stub
-    return null;
+    return id;
   }
 
-  
+  /**
+  * Immediately update the position of a unit --- skips movement animation.
+  * Used when loading level, spawning, etc.
+  */
+  public void setPosition( Coords koords )
+  {
+    sprite.setPosition( koords.getX(), koords.getY() );
+  }
+
+
 }
