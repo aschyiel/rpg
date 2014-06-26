@@ -87,9 +87,9 @@ public class ChessBoard
       for ( int col = 0; col < columns; col++ )
       {
         Square sq = squares[row][col];
-        sq.up    = ( row - 1 < 0           )? null : squares[ row + 1][ col     ];
+        sq.up    = ( row - 1 < 0           )? null : squares[ row - 1][ col     ];
         sq.left  = ( col - 1 < 0           )? null : squares[ row    ][ col - 1 ];
-        sq.down  = ( row + 1 > rows    - 1 )? null : squares[ row - 1][ col     ];
+        sq.down  = ( row + 1 > rows    - 1 )? null : squares[ row + 1][ col     ];
         sq.right = ( col + 1 > columns - 1 )? null : squares[ row    ][ col + 1 ];
       }
     }

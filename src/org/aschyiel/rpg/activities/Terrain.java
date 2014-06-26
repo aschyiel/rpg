@@ -173,7 +173,7 @@ public class Terrain
       GameObject unit = plant.makeUnit( details.getUnitType(), details.getOwner() );
       int m = details.getColumn();
       int n = details.getRow();
-      board.placeUnit( unit, m, n );
+      board.placeUnit( unit, n, m );
       unit.setPosition( asCoords( m, n ) );
     }
   }

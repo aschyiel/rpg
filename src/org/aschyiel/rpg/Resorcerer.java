@@ -15,6 +15,7 @@ import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.aschyiel.rpg.activities.Terrain; 
 import org.aschyiel.rpg.level.BackgroundType;
+import org.aschyiel.rpg.level.UnitType;
 
 /**
 * The resource management solution of good and NOT evil.
@@ -53,7 +54,7 @@ public class Resorcerer
     
     // Build-up backgrounds.
     backgrounds = new HashMap<String, IBackground>();
-    backgrounds.put( "grass", bg( "gfx/background_grass.png" ) );
+    backgrounds.put( BackgroundType.GRASS.toString(), bg( "gfx/background_grass.png" ) );
 
     // Build-up tile-textures.
     textures = new HashMap<String, TiledTextureRegion>();
@@ -88,7 +89,8 @@ public class Resorcerer
   private void setupTextureAtlas()
   {
     atlas = new BitmapTextureAtlas( tex, 1024, 1024 );
-    textures.put( "tank",         tile( "tank1.png",        3, 4, 128 ) );    // 96x128
+    textures.put( UnitType.TANK.toString(),
+                                  tile( "tank1.png",        3, 4, 128 ) );    // 96x128
     textures.put( "terrain_tile", tile( "terrain_tile.png", 1, 3,  32 ) );    // 32x96
     textures.put( "nav_point",    tile( "nav_point.png",    1, 1,  48 ) );    // 48x48
     atlas.load();    //..last!..
