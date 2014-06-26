@@ -45,6 +45,11 @@ public class GameObject
     this.sprite = sprite;
   }
 
+  public Sprite getSprite()
+  {
+    return sprite;
+  }
+
   public Object getUnitType()
   {
     return unitType;

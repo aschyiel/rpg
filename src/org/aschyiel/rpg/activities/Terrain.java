@@ -119,7 +119,7 @@ public class Terrain
   }
 
   @Override
-  public void onPopulateScene( Scene scene, OnPopulateSceneCallback callback )
+  public void onPopulateScene( final Scene scene, OnPopulateSceneCallback callback )
       throws Exception
   {
     Level lvl = getLevelInfo();
@@ -136,7 +136,7 @@ public class Terrain
     //   3. Render tiles based on level design.
     scene.setBackground( rez.getBackground( BackgroundType.GRASS ) );
 
-    instantiateUnits( lvl.getUnitsIterator() );
+    instantiateUnits( scene, lvl.getUnitsIterator() );
 
     // TODO:
     //   Need to map squares to pixels inorder to place sprites.
@@ -146,7 +146,7 @@ public class Terrain
   }
 
   @Override
-  public boolean onSceneTouchEvent( Scene pScene, TouchEvent pSceneTouchEvent )
+  public boolean onSceneTouchEvent( Scene scene, TouchEvent sceneTouchEvent )
   {
     // TODO Auto-generated method stub
     return false;
@@ -161,16 +161,17 @@ public class Terrain
     // TODO: Check who's playing, what they're using, and serialize the level appropriately...
     Level lvl = new Level();
     lvl.getUnits().add( new LevelDetail( UnitType.TANK, 0, 0, Player.ONE ) );
-    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 2, 4, Player.CPU ) );
+    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 2, 3, Player.CPU ) );
     return lvl;
   }
 
-  private void instantiateUnits( ListIterator<LevelDetail> it )
+  private void instantiateUnits( final Scene scene, ListIterator<LevelDetail> it )
   {
     while ( it.hasNext() )
     {
       LevelDetail details = it.next();
       GameObject unit = plant.makeUnit( details.getUnitType(), details.getOwner() );
+      scene.attachChild( unit.getSprite() );
       int m = details.getColumn();
       int n = details.getRow();
       board.placeUnit( unit, n, m );

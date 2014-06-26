@@ -12,3 +12,8 @@ gen/**/*
 rpg.sublime-project
 rpg.sublime-workspace
 
+**/*/.directory
+
+*~
+**/*~
+
