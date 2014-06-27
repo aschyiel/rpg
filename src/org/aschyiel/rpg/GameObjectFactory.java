@@ -36,6 +36,7 @@ public class GameObjectFactory
       default:
         throw new RuntimeException( "Invalid unit type." );
     }
+    unit.getSprite().setSize( targetWidth, targetHeight );
     return unit;
   }
 
@@ -46,5 +47,16 @@ public class GameObjectFactory
     it.setAttackDamage(   100 );
     it.setSprite( new Sprite( 0, 0, rez.getUnitTexture( it ), buffy ) );
   }
+
+  /**
+  * Specify the end-goal sprite size so that it fills it's square.
+  */
+  public void setTargetSize( int w, int h )
+  {
+    targetWidth  = (float) w;
+    targetHeight = (float) h;
+  }
+  private float targetWidth;
+  private float targetHeight;
 
 }

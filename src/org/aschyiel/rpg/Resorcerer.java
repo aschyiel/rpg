@@ -88,11 +88,19 @@ public class Resorcerer
   */
   private void setupTextureAtlas()
   {
-    atlas = new BitmapTextureAtlas( tex, 1024, 1024 );
+    int max = 1024;
+    atlas = new BitmapTextureAtlas( tex, max, max );
     textures.put( UnitType.TANK.toString(),
                                   tile( "tank1.png",        3, 4, 128 ) );    // 96x128
-    textures.put( "terrain_tile", tile( "terrain_tile.png", 1, 3,  32 ) );    // 32x96
+    textures.put( "terrain_tile", tile( "terrain_tile.png", 1, 3,  96 ) );    // 32x96
     textures.put( "nav_point",    tile( "nav_point.png",    1, 1,  48 ) );    // 48x48
+
+    if ( atlasIndex > max )
+    {
+      throw new RuntimeException( "We're gonna flood our atlas "+
+                                  "(please increase atlas-size)." );
+    }
+
     atlas.load();    //..last!..
   }
 

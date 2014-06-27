@@ -3,7 +3,11 @@ package org.aschyiel.rpg.graph;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.TiledSprite;
+import org.andengine.input.touch.TouchEvent;
 import org.aschyiel.rpg.GameObject;
+import org.aschyiel.rpg.Resorcerer;
 
 /**
 * The chess-board is mechanism for keeping tabs on unit spatial orientation.
@@ -47,6 +51,45 @@ public class ChessBoard
   public GameObject removeUnit( int row, int col )
   {
     return squares[row][col].unoccupy();
+  }
+
+  /**
+  * Render the squares - for development purposes only.
+  */
+  public void showSquares( float w, float h, Resorcerer rez, Scene scn )
+  {
+    for ( int m = 0; m < rows;    m++ )
+    for ( int n = 0; n < columns; n++ )
+    {
+      TiledSprite sq = new TiledSprite( w * n,
+                                        h * m,
+                                        rez.getTexture( "terrain_tile" ),
+                                        rez.getVertexBufferObjectManager() )
+          {
+            @Override
+            public boolean onAreaTouched( final TouchEvent vente,
+                                          final float _,
+                                          final float __ )
+            {
+              if ( !vente.isActionUp() )
+              {
+                return false;
+              }
+              TiledSprite sq = this;
+              // Cycle through the square's image(s) on "click".
+              int idx = sq.getCurrentTileIndex() + 1;
+              if ( idx > sq.getTileCount() - 1 )
+              {
+                idx = 0;
+              }
+              sq.setCurrentTileIndex( idx );
+              return true;
+            }
+          };
+      sq.setSize( w, h );
+      scn.registerTouchArea( sq );
+      scn.attachChild( sq );
+    }
   }
 
   /**

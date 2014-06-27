@@ -64,6 +64,11 @@ public class Terrain
   public static final int CAMERA_WIDTH  = 720;
   public static final int CAMERA_HEIGHT = 480;
 
+  /**
+  * When enabled, show additional information, sandboxes, etc.
+  */
+  public static final boolean DEV = true;
+
   //-----------------------------------
   //
   // Private Variables.
@@ -115,6 +120,7 @@ public class Terrain
   {
     // TODO: Add listeners.
     final Scene scene = new Scene();
+    scene.setTouchAreaBindingOnActionDownEnabled( true );
     callback.onCreateSceneFinished( scene );
   }
 
@@ -124,11 +130,15 @@ public class Terrain
   {
     Level lvl = getLevelInfo();
 
-    board = new ChessBoard( lvl.getBoardRows(), lvl.getBoardColumns() );
-
     // Needed for translating board vs. canvas space.
     rowHeight   = CAMERA_HEIGHT / lvl.getBoardRows();
     columnWidth = CAMERA_WIDTH  / lvl.getBoardColumns();
+
+    board = new ChessBoard( lvl.getBoardRows(), lvl.getBoardColumns() );
+    if ( DEV )
+    {
+      board.showSquares( columnWidth, rowHeight, rez, scene );
+    }
 
     // TOOD:
     //   1. Populate units.
@@ -167,6 +177,7 @@ public class Terrain
 
   private void instantiateUnits( final Scene scene, ListIterator<LevelDetail> it )
   {
+    plant.setTargetSize( columnWidth, rowHeight );
     while ( it.hasNext() )
     {
       LevelDetail details = it.next();
