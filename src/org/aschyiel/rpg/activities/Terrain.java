@@ -34,10 +34,13 @@ import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasS
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.ui.activity.BaseGameActivity;
 import org.aschyiel.rpg.Coords;
+import org.aschyiel.rpg.Focus;
 import org.aschyiel.rpg.GameObject;
 import org.aschyiel.rpg.GameObjectFactory;
 import org.aschyiel.rpg.Resorcerer;
 import org.aschyiel.rpg.graph.ChessBoard;
+import org.aschyiel.rpg.graph.OnSquareClickHandler;
+import org.aschyiel.rpg.graph.ChessBoard.Square;
 import org.aschyiel.rpg.level.BackgroundType;
 import org.aschyiel.rpg.level.Level;
 import org.aschyiel.rpg.level.LevelDetail;
@@ -52,7 +55,7 @@ import org.aschyiel.rpg.level.UnitType;
 */
 public class Terrain
     extends BaseGameActivity
-    implements IOnSceneTouchListener
+    implements IOnSceneTouchListener, OnSquareClickHandler
 {
   
   //-----------------------------------
@@ -68,6 +71,7 @@ public class Terrain
   * When enabled, show additional information, sandboxes, etc.
   */
   public static final boolean DEV = true;
+  private static final String TAG = "[RPG:Terrain]";
 
   //-----------------------------------
   //
@@ -103,13 +107,15 @@ public class Terrain
   * Careful not to confuse this with Android's "res".
   */
   private Resorcerer rez;
+  private Terrain tera;
 
   @Override
   public void onCreateResources( OnCreateResourcesCallback callback )
       throws Exception
   {
     BitmapTextureAtlasTextureRegionFactory.setAssetBasePath( "gfx/" );
-    rez = new Resorcerer( this );
+    tera = this;
+    rez = new Resorcerer( tera );
     plant = new GameObjectFactory( rez );
     callback.onCreateResourcesFinished();
   }
@@ -128,6 +134,8 @@ public class Terrain
   public void onPopulateScene( final Scene scene, OnPopulateSceneCallback callback )
       throws Exception
   {
+    Log.w( TAG, "Welcome to the league of Draven!" );
+    
     Level lvl = getLevelInfo();
 
     // Needed for translating board vs. canvas space.
@@ -137,9 +145,13 @@ public class Terrain
     board = new ChessBoard( lvl.getBoardRows(), lvl.getBoardColumns() );
     if ( DEV )
     {
-      board.showSquares( columnWidth, rowHeight, rez, scene );
+      board.bindSquares( columnWidth, rowHeight, rez, scene, (OnSquareClickHandler) tera );
     }
 
+    currentPerspective = Player.ONE;    // FIXME: This should be based on who we're signed in.
+    focus = new Focus( rez, currentPerspective, columnWidth, rowHeight );
+    scene.attachChild( focus );
+    
     // TOOD:
     //   1. Populate units.
     //   2. Connect tiles.
@@ -163,6 +175,16 @@ public class Terrain
   }
 
   /**
+  * The current player we're seeing the game through/as.
+  */
+  private Player currentPerspective;
+  
+  /**
+  * The thing that goes around highlighting the selection for things.
+  */
+  private Focus focus;
+  
+  /**
   * Returns a description on how to setup the next level of terrain,
   * where to place units, etc.
   */
@@ -182,10 +204,10 @@ public class Terrain
     {
       LevelDetail details = it.next();
       GameObject unit = plant.makeUnit( details.getUnitType(), details.getOwner() );
-      scene.attachChild( unit.getSprite() );
+      scene.attachChild( unit );
       int m = details.getColumn();
       int n = details.getRow();
-      board.placeUnit( unit, n, m );
+      board.placeUnit( unit, m, n );
       unit.setPosition( asCoords( m, n ) );
     }
   }
@@ -199,5 +221,51 @@ public class Terrain
   }
   private Integer rowHeight;
   private Integer columnWidth;
+
+  /**
+  * The user click on a square within the board.
+  * If there is a unit occupying that square, apply an action to it.
+  * 
+  * Valid actions are:
+  * - unit selection.
+  * - set as the "target" of the currently selected unit.
+  * - and/or both of the above.
+  *
+  * @param sq The target location of the click.
+  * @param target May be null.
+  */
+  @Override
+  public void onSquareClicked( Square sq, GameObject target )
+  {
+    Log.d( TAG, "onSquareClicked: square:"+ sq + ", target:"+ target );
+    if ( null != currentlySelectedUnit )
+    {
+      currentlySelectedUnit.applyAction( sq, target );
+    }
+    setCurrentlySelectedUnit( target );
+  }
+  
+  private void setCurrentlySelectedUnit( GameObject unit )
+  {
+    final GameObject prev = currentlySelectedUnit;
+    if ( null != prev )
+    {
+      prev.setFocus( null );
+    }
+
+    currentlySelectedUnit = unit;
+    if ( null != unit )
+    {
+      unit.setFocus( focus );
+    }
+    else
+    {
+      focus.setTarget( null );
+    }
+    // TODO: Apply selection entity to track it.
+    // TODO: Update the HUD to show context information on the unit.
+  }
+
+  private GameObject currentlySelectedUnit = null;
 
 }

@@ -27,7 +27,8 @@ public class GameObjectFactory
   */
   public GameObject makeUnit( UnitType unitType, Player owner )
   {
-    GameObject unit = new GameObject( unitType, owner, nextId++ );
+    GameObject unit = new GameObject( unitType, owner, nextId++,
+                                      rez.getTexture( unitType ), buffy );
     switch( unitType )
     {
       case TANK:
@@ -36,7 +37,7 @@ public class GameObjectFactory
       default:
         throw new RuntimeException( "Invalid unit type." );
     }
-    unit.getSprite().setSize( targetWidth, targetHeight );
+    unit.setSize( targetWidth, targetHeight );
     return unit;
   }
 
@@ -45,7 +46,6 @@ public class GameObjectFactory
     it.setHealth(         100 );
     it.setMovementSpeed(  100 );
     it.setAttackDamage(   100 );
-    it.setSprite( new Sprite( 0, 0, rez.getUnitTexture( it ), buffy ) );
   }
 
   /**

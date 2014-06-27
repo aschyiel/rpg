@@ -61,13 +61,16 @@ public class Resorcerer
     setupTextureAtlas();
   }
 
-  public TiledTextureRegion getUnitTexture( GameObject it )
+  public TiledTextureRegion getTexture( GameObject it )
   {
     // TODO: Allow unit differentiation based on the owner (ie. blue tanks
     //   for player1, red tanks for player2, etc.).
-    return getTexture( it.getUnitType().toString() );
+    return getTexture( it.getUnitType() );
   }
-
+  public TiledTextureRegion getTexture( UnitType unitType )
+  {
+    return getTexture( unitType.toString() );
+  }
   public TiledTextureRegion getTexture( String name )
   {
     return textures.get( name );
@@ -94,6 +97,7 @@ public class Resorcerer
                                   tile( "tank1.png",        3, 4, 128 ) );    // 96x128
     textures.put( "terrain_tile", tile( "terrain_tile.png", 1, 3,  96 ) );    // 32x96
     textures.put( "nav_point",    tile( "nav_point.png",    1, 1,  48 ) );    // 48x48
+    textures.put( "focus",        tile( "focus.png",        1, 3,  96 ) );    // 32x96
 
     if ( atlasIndex > max )
     {

@@ -3,11 +3,16 @@ package org.aschyiel.rpg.graph;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.andengine.entity.Entity;
 import org.andengine.entity.scene.Scene;
+import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.input.touch.TouchEvent;
 import org.aschyiel.rpg.GameObject;
 import org.aschyiel.rpg.Resorcerer;
+import org.aschyiel.rpg.activities.Terrain;
+
+import android.util.Log;
 
 /**
 * The chess-board is mechanism for keeping tabs on unit spatial orientation.
@@ -18,6 +23,7 @@ import org.aschyiel.rpg.Resorcerer;
 public class ChessBoard
 {
 
+  protected static final String TAG = "[RPG:ChessBoard]";
   /**
   * Our board dimensions in squares.
   * columns are synonymous with width (m).
@@ -54,14 +60,20 @@ public class ChessBoard
   }
 
   /**
-  * Render the squares - for development purposes only.
+  * Setup the touch event listeners accross the board;
+  * (Render the squares - for development purposes only).
   */
-  public void showSquares( float w, float h, Resorcerer rez, Scene scn )
+  public void bindSquares( float w,
+                           float h,
+                           Resorcerer rez,
+                           Scene scn,
+                           final OnSquareClickHandler cb )
   {
     for ( int m = 0; m < rows;    m++ )
     for ( int n = 0; n < columns; n++ )
     {
-      TiledSprite sq = new TiledSprite( w * n,
+      final Square sq = squares[m][n];
+      final Sprite sprite = new Sprite( w * n,
                                         h * m,
                                         rez.getTexture( "terrain_tile" ),
                                         rez.getVertexBufferObjectManager() )
@@ -75,20 +87,14 @@ public class ChessBoard
               {
                 return false;
               }
-              TiledSprite sq = this;
-              // Cycle through the square's image(s) on "click".
-              int idx = sq.getCurrentTileIndex() + 1;
-              if ( idx > sq.getTileCount() - 1 )
-              {
-                idx = 0;
-              }
-              sq.setCurrentTileIndex( idx );
+              cb.onSquareClicked( sq, sq.occupant );
               return true;
             }
           };
-      sq.setSize( w, h );
-      scn.registerTouchArea( sq );
-      scn.attachChild( sq );
+      sprite.setAlpha( ( Terrain.DEV )? 0.3f : 0f );
+      sprite.setSize( w, h );
+      scn.registerTouchArea( sprite );
+      scn.attachChild( sprite );
     }
   }
 
@@ -141,7 +147,7 @@ public class ChessBoard
   /**
   * An individual place within our board.
   */
-  private class Square
+  public class Square
   {
     /** ie. "A3" */
     protected final String name;
@@ -161,7 +167,7 @@ public class ChessBoard
     protected final boolean isColoured;
 
     /** The current occupant of the square (changes). */
-    private GameObject occupant = null;
+    protected GameObject occupant = null;
 
     Square( int row, int column, boolean isColoured )
     {
