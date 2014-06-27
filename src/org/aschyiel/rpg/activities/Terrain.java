@@ -37,8 +37,11 @@ import org.aschyiel.rpg.Coords;
 import org.aschyiel.rpg.Focus;
 import org.aschyiel.rpg.GameObject;
 import org.aschyiel.rpg.GameObjectFactory;
+import org.aschyiel.rpg.PowerChords;
 import org.aschyiel.rpg.Resorcerer;
 import org.aschyiel.rpg.graph.ChessBoard;
+import org.aschyiel.rpg.graph.GirlFriend;
+import org.aschyiel.rpg.graph.Navigator;
 import org.aschyiel.rpg.graph.OnSquareClickHandler;
 import org.aschyiel.rpg.graph.ChessBoard.Square;
 import org.aschyiel.rpg.level.BackgroundType;
@@ -55,7 +58,7 @@ import org.aschyiel.rpg.level.UnitType;
 */
 public class Terrain
     extends BaseGameActivity
-    implements IOnSceneTouchListener, OnSquareClickHandler
+    implements IOnSceneTouchListener, OnSquareClickHandler, PowerChords
 {
   
   //-----------------------------------
@@ -97,7 +100,7 @@ public class Terrain
     final Display display = getWindowManager().getDefaultDisplay();
     return new EngineOptions(
         true,
-        ScreenOrientation.LANDSCAPE_FIXED,
+        ScreenOrientation.LANDSCAPE_SENSOR,
         new RatioResolutionPolicy( display.getWidth(), display.getHeight() ),
         cam );
   }
@@ -108,6 +111,7 @@ public class Terrain
   */
   private Resorcerer rez;
   private Terrain tera;
+  private Navigator gf;
 
   @Override
   public void onCreateResources( OnCreateResourcesCallback callback )
@@ -143,6 +147,7 @@ public class Terrain
     columnWidth = CAMERA_WIDTH  / lvl.getBoardColumns();
 
     board = new ChessBoard( lvl.getBoardRows(), lvl.getBoardColumns() );
+    gf = new GirlFriend( board, (PowerChords) tera );
     if ( DEV )
     {
       board.bindSquares( columnWidth, rowHeight, rez, scene, (OnSquareClickHandler) tera );
@@ -215,7 +220,8 @@ public class Terrain
   /**
   * Translate boards-squares (rows and columns) into AndEngine pixels.
   */
-  private Coords asCoords( int m, int n )
+  @Override
+  public Coords asCoords( int m, int n )
   {
     return new Coords( n * columnWidth, m * rowHeight );
   }
@@ -240,7 +246,7 @@ public class Terrain
     Log.d( TAG, "onSquareClicked: square:"+ sq + ", target:"+ target );
     if ( null != currentlySelectedUnit )
     {
-      currentlySelectedUnit.applyAction( sq, target );
+      currentlySelectedUnit.applyAction( sq, target, gf );
     }
     setCurrentlySelectedUnit( target );
   }

@@ -5,6 +5,7 @@ import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.aschyiel.rpg.graph.ChessBoard.Square;
+import org.aschyiel.rpg.graph.Navigator;
 import org.aschyiel.rpg.level.Player;
 import org.aschyiel.rpg.level.UnitType;
 
@@ -109,19 +110,26 @@ public class GameObject extends TiledSprite
    * @param sq
    * @param target (May be null).
    */
-  public void applyAction( Square sq, GameObject target )
+  public void applyAction( Square sq, GameObject target, Navigator gf )
   {
     if ( null != target )
     {
-      //..
+      // TODO: Iteract with other units (attack, heal, etc.).
     }
-    else
+    else if ( isMobile() )
     {
-      //..
+      // Navigate the graph along a path.
+      gf.guide( this, sq );
     }
-    // TODO Auto-generated method stub
-    
   }
 
+  /**
+  * Meaning, our game-object can move about the map.
+  */
+  private boolean _isMobile = true;
+  public boolean isMobile()
+  {
+    return _isMobile;
+  }
 
 }

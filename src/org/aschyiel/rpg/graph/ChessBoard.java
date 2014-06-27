@@ -1,6 +1,8 @@
 package org.aschyiel.rpg.graph;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.andengine.entity.Entity;
@@ -26,11 +28,11 @@ public class ChessBoard
   protected static final String TAG = "[RPG:ChessBoard]";
   /**
   * Our board dimensions in squares.
-  * columns are synonymous with width (m).
-  * rows are synonymous with height (n).
+  * rows    are synonymous with height (m).
+  * columns are synonymous with width  (n).
   */
-  private final int rows;
-  private final int columns;
+  protected final int rows;
+  protected final int columns;
 
   private final Square[][] squares;
 
@@ -47,7 +49,7 @@ public class ChessBoard
 
   public void placeUnit( GameObject unit, int row, int col )
   {
-    Square sq = squares[row][col];
+    final Square sq = squares[row][col];
     sq.occupy( unit );
   }
   
@@ -56,7 +58,34 @@ public class ChessBoard
    */
   public GameObject removeUnit( int row, int col )
   {
-    return squares[row][col].unoccupy();
+    return removeUnit( squares[row][col] );
+  }
+  public GameObject removeUnit( final Square sq )
+  {
+    final GameObject unit = sq.unoccupy();
+    broadcastVacancy( sq );
+    return unit;
+  }
+
+  /**
+  * Let others know that a previously occupied square is now available.
+  * Needed for blocked units that are trying to complete their navigation-steps.
+  *
+  * @see GirlFriend#guide
+  */
+  private void broadcastVacancy( final Square sq )
+  {
+    for ( VacancySubscriber sub : vacancySubscribers )
+    {
+      sub.onVacancy( sq );
+    }
+  }
+
+  private List<VacancySubscriber> vacancySubscribers = new ArrayList<VacancySubscriber>();
+
+  public void subscribeToVacancies( final VacancySubscriber sub )
+  {
+    vacancySubscribers.add( sub );
   }
 
   /**
@@ -104,7 +133,7 @@ public class ChessBoard
   */
   private final Map<Integer, Square> squaresByUnit;
 
-  private Square findSquare( GameObject unit )
+  protected Square findSquare( GameObject unit )
   {
     return squaresByUnit.get( unit.getId() );
   }
@@ -178,9 +207,9 @@ public class ChessBoard
       this.isColoured = isColoured;
     }
 
-    public void occupy( GameObject unit )
+    protected void occupy( GameObject unit )
     {
-      if ( null != occupant )
+      if ( isOccupado() )
       {
         throw new RuntimeException( "Don't double-book units onto the same square." );
       }
@@ -195,12 +224,20 @@ public class ChessBoard
     /**
     * Clear out a square and returns the current occupant, if any.
     */
-    public GameObject unoccupy()
+    protected GameObject unoccupy()
     {
       GameObject unit = occupant;
       occupant = null;
       squaresByUnit.put( unit.getId(), null );
       return unit;
+    }
+
+    /**
+    * Returns true if we're NOT vacant.
+    */
+    protected boolean isOccupado()
+    {
+      return null != occupant;
     }
 
     @Override
