@@ -9,6 +9,7 @@ import java.util.Map;
 import org.aschyiel.rpg.GameObject;
 import org.aschyiel.rpg.PowerChords;
 import org.aschyiel.rpg.graph.ChessBoard.Square;
+import org.aschyiel.rpg.level.UnitType;
 
 /**
 * Girl-friend always knows where she's going! haha
@@ -29,9 +30,10 @@ public class GirlFriend implements Navigator, VacancySubscriber
   public void guide( GameObject unit, Square dst )
   {
     Square src = matrix.findSquare( unit );
-    List<Step> steps = findPath( src, dst );
-    NavPath navi = new NavPath( unit, steps );
-    guide( navi );
+    List<Step> steps = findPath( src, dst, unit.getUnitType() );
+    Step.print( steps );
+//    NavPath navi = new NavPath( unit, steps );
+//    guide( navi );
   }
 
   @Override
@@ -100,12 +102,10 @@ public class GirlFriend implements Navigator, VacancySubscriber
     // 3. Execute the callback at the end of a single path. 
   }
 
-  private List<Step> findPath( Square src, Square dst )
+  private List<Step> findPath( final Square src, final Square dst, final UnitType unitType )
   {
     List<Step> path = new ArrayList<Step>();
-    
-    // TODO: ...
-    
+    DefaultPathFinder.getInstance().findPath( path, src, dst, unitType );
     return path;
   }
 

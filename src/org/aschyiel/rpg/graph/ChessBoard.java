@@ -13,6 +13,7 @@ import org.andengine.input.touch.TouchEvent;
 import org.aschyiel.rpg.GameObject;
 import org.aschyiel.rpg.Resorcerer;
 import org.aschyiel.rpg.activities.Terrain;
+import org.aschyiel.rpg.level.UnitType;
 
 import android.util.Log;
 
@@ -244,6 +245,18 @@ public class ChessBoard
     public String toString()
     {
       return name;
+    }
+
+    /**
+    * Returns true if this square is unavailable to the given unit-type.
+    * ie. ships can't go on land.
+    */
+    public boolean isInaccessible( UnitType unitType )
+    {
+      // TODO: Don't hardcode -- base it off of land-types, etc.
+      //   Also, we should allow units to "run-over" other unit-types,
+      //   based on the occupant, etc.
+      return isOccupado();
     }
   }
 
