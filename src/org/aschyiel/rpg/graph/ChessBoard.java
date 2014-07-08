@@ -11,6 +11,8 @@ import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.input.touch.TouchEvent;
 import org.aschyiel.rpg.GameObject;
+import org.aschyiel.rpg.IFullGameObject;
+import org.aschyiel.rpg.IGameObject;
 import org.aschyiel.rpg.Resorcerer;
 import org.aschyiel.rpg.activities.Terrain;
 import org.aschyiel.rpg.level.UnitType;
@@ -35,7 +37,7 @@ public class ChessBoard
   protected final int rows;
   protected final int columns;
 
-  private final Square[][] squares;
+  protected final Square[][] squares;
 
   public ChessBoard( int rows, int columns )
   {
@@ -48,22 +50,25 @@ public class ChessBoard
     setupEdges();
   }
 
-  public void placeUnit( GameObject unit, int row, int col )
+  public void placeUnit( final IGameObject unit, int row, int col )
   {
-    final Square sq = squares[row][col];
+    placeUnit( unit, squares[row][col] );
+  }
+  public void placeUnit( final IGameObject unit, final Square sq )
+  {
     sq.occupy( unit );
   }
   
   /** 
    * The corollary of ChessBoard#placeUnit. 
    */
-  public GameObject removeUnit( int row, int col )
+  public IGameObject removeUnit( int row, int col )
   {
     return removeUnit( squares[row][col] );
   }
-  public GameObject removeUnit( final Square sq )
+  public IGameObject removeUnit( final Square sq )
   {
-    final GameObject unit = sq.unoccupy();
+    final IGameObject unit = sq.unoccupy();
     broadcastVacancy( sq );
     return unit;
   }
@@ -117,7 +122,7 @@ public class ChessBoard
               {
                 return false;
               }
-              cb.onSquareClicked( sq, sq.occupant );
+              cb.onSquareClicked( sq, (IFullGameObject) sq.occupant );
               return true;
             }
           };
@@ -130,11 +135,11 @@ public class ChessBoard
 
   /**
   * A reverse lookup capability --- managed via Square#occupy et al.
-  * Uses the GameObject.id as the key.
+  * Uses the IGameObject.id as the key.
   */
   private final Map<Integer, Square> squaresByUnit;
 
-  protected Square findSquare( GameObject unit )
+  protected Square findSquare( IGameObject unit )
   {
     return squaresByUnit.get( unit.getId() );
   }
@@ -197,7 +202,7 @@ public class ChessBoard
     protected final boolean isColoured;
 
     /** The current occupant of the square (changes). */
-    protected GameObject occupant = null;
+    protected IGameObject occupant = null;
 
     Square( int row, int column, boolean isColoured )
     {
@@ -208,7 +213,7 @@ public class ChessBoard
       this.isColoured = isColoured;
     }
 
-    protected void occupy( GameObject unit )
+    protected void occupy( IGameObject unit )
     {
       if ( isOccupado() )
       {
@@ -225,9 +230,9 @@ public class ChessBoard
     /**
     * Clear out a square and returns the current occupant, if any.
     */
-    protected GameObject unoccupy()
+    protected IGameObject unoccupy()
     {
-      GameObject unit = occupant;
+      IGameObject unit = occupant;
       occupant = null;
       squaresByUnit.put( unit.getId(), null );
       return unit;
@@ -253,6 +258,12 @@ public class ChessBoard
     */
     public boolean isInaccessible( UnitType unitType )
     {
+      // Always allow empty-values free reign (for testing).
+      if ( null == unitType )
+      {
+        return false;
+      }
+
       // TODO: Don't hardcode -- base it off of land-types, etc.
       //   Also, we should allow units to "run-over" other unit-types,
       //   based on the occupant, etc.

@@ -1,10 +1,15 @@
 package org.aschyiel.rpg;
 
+import org.andengine.entity.IEntity;
+import org.andengine.entity.modifier.IEntityModifier;
+import org.andengine.entity.modifier.MoveModifier;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
+import org.andengine.util.modifier.IModifier;
 import org.aschyiel.rpg.graph.ChessBoard.Square;
+import org.aschyiel.rpg.graph.GirlFriend.NavCallback;
 import org.aschyiel.rpg.graph.Navigator;
 import org.aschyiel.rpg.level.Player;
 import org.aschyiel.rpg.level.UnitType;
@@ -12,11 +17,17 @@ import org.aschyiel.rpg.level.UnitType;
 /**
 * Well, um, everything is a game-object at the end of the day.
 */
-public class GameObject extends TiledSprite
+public class GameObject extends TiledSprite implements IFullGameObject
 {
   private final Player owner;
   private final UnitType unitType;
   private final int id;
+
+  /** For Testing purposes... */
+  public GameObject( UnitType unitType )
+  {
+    this( unitType, null, 1337, null, null );
+  }
 
   public GameObject( UnitType unitType,
                      Player owner,
@@ -110,11 +121,11 @@ public class GameObject extends TiledSprite
    * @param sq
    * @param target (May be null).
    */
-  public void applyAction( Square sq, GameObject target, Navigator gf )
+  public void applyAction( Square sq, IGameObject them, Navigator gf )
   {
-    if ( null != target )
+    if ( null != them )
     {
-      // TODO: Iteract with other units (attack, heal, etc.).
+      // TODO: Interact with other units (attack, heal, etc.).
     }
     else if ( isMobile() )
     {
@@ -130,6 +141,45 @@ public class GameObject extends TiledSprite
   public boolean isMobile()
   {
     return _isMobile;
+  }
+
+  @Override
+  public void animate( final Coords from, final Coords to, final NavCallback cb )
+  {
+    // TODO: Imply direction by changing which animation frames we're gonna use.
+    registerEntityModifier( new MoveModifier(
+        getMoveSpeedDuration(),
+        from.getX(),
+        to  .getX(),
+        from.getY(),
+        to  .getY(),
+        new IEntityModifier.IEntityModifierListener()
+            {
+              @Override
+              public void onModifierStarted( IModifier<IEntity> pModifier, IEntity pItem )
+              {
+                //..
+              }
+              
+              @Override
+              public void onModifierFinished( IModifier<IEntity> pModifier, IEntity pItem )
+              {
+                cb.callback();
+              }
+            }
+        ));
+  }
+
+  /**
+  * Returns the animation-duration based on the move-speed for this unit.
+  * @return The AndEngine (float) duration in seconds.
+  */
+  private float getMoveSpeedDuration()
+  {
+    // TODO: Don't hardcode.
+    // TODO: How can we apply move-speed modifiers based on the current land-type? etc.
+    //   ie. You should move slower through water.
+    return 0.5f;
   }
 
 }

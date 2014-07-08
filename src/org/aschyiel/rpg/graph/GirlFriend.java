@@ -6,10 +6,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.aschyiel.rpg.GameObject;
+import org.aschyiel.rpg.Coords;
+import org.aschyiel.rpg.IGameObject;
 import org.aschyiel.rpg.PowerChords;
 import org.aschyiel.rpg.graph.ChessBoard.Square;
 import org.aschyiel.rpg.level.UnitType;
+
+import android.util.Log;
 
 /**
 * Girl-friend always knows where she's going! haha
@@ -18,22 +21,23 @@ public class GirlFriend implements Navigator, VacancySubscriber
 {
   private final ChessBoard matrix;
   private final PowerChords sona;
+  
+  private final static String TAG = "[RPG:Dr. GirlFriend]";
 
   public GirlFriend( ChessBoard matrix, PowerChords sona )
   {
     this.matrix = matrix;
-    this.sona    = sona; 
+    this.sona   = sona;
     matrix.subscribeToVacancies( this );
   }
 
   @Override
-  public void guide( GameObject unit, Square dst )
+  public void guide( IGameObject unit, Square dst )
   {
     Square src = matrix.findSquare( unit );
     List<Step> steps = findPath( src, dst, unit.getUnitType() );
     Step.print( steps );
-//    NavPath navi = new NavPath( unit, steps );
-//    guide( navi );
+    guide( new NavPath( unit, steps ) );
   }
 
   @Override
@@ -63,6 +67,7 @@ public class GirlFriend implements Navigator, VacancySubscriber
   */
   private void guide( final NavPath navi )
   {
+    Log.v( TAG, "gf#guide -- step:" + navi.getCurrentStep() );
     final GirlFriend gf = this;
     if ( navi.isAtDestination() )
     {
@@ -93,13 +98,32 @@ public class GirlFriend implements Navigator, VacancySubscriber
     }
   }
   
-  private void animate( GameObject unit, Square from, Square to, NavCallback cb )
+  private void animate( final IGameObject unit,
+                        final Square from,
+                        final Square to,
+                        final NavCallback cb )
   {
-    sona.asCoords( from.row, from.column );
+    Log.d( TAG, "animate from:"+ from +", to: "+ to );
+    final GirlFriend gf = this;
+    unit.animate(
+      sona.asCoords( from.row, from.column ),
+      sona.asCoords( to  .row, to  .column ),
+      new NavCallback()
+      {
+        @Override
+        public void callback()
+        {
+          gf.matrix.removeUnit( from );
+          gf.matrix.placeUnit(  unit, to );
+          cb.callback();
+        }
+      });
+
     // TODO:
     // 1. Update the sprite to be facing the right direction, and using the correct animation-loop.
     // 2. Create a path in AndEngine
-    // 3. Execute the callback at the end of a single path. 
+    // 3. Execute the callback at the end of a single path.
+
   }
 
   private List<Step> findPath( final Square src, final Square dst, final UnitType unitType )
@@ -109,7 +133,7 @@ public class GirlFriend implements Navigator, VacancySubscriber
     return path;
   }
 
-  private interface NavCallback
+  public interface NavCallback
   {
     void callback();
   }

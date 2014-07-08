@@ -12,7 +12,7 @@ import android.util.Log;
 public final class Step
 { 
   protected final Square to;
-  protected final Square from; 
+  protected final Square from;
   
   public Step( final Square a, final Square b )
   {
@@ -41,5 +41,11 @@ public final class Step
     }
 
     Log.d( "[RPG:Step]", sb.toString() );
+  }
+
+  @Override
+  public String toString()
+  {
+    return "{ from: "+ from +", to: "+ to +" }";
   }
 }

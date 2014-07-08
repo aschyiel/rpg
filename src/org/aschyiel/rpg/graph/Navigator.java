@@ -1,6 +1,6 @@
 package org.aschyiel.rpg.graph;
 
-import org.aschyiel.rpg.GameObject;
+import org.aschyiel.rpg.IGameObject;
 import org.aschyiel.rpg.graph.ChessBoard.Square;
 
 /**
@@ -14,5 +14,5 @@ public interface Navigator
   /**
   * Guide the given unit from it's current position to the target destination.
   */
-  void guide( GameObject unit, Square destination ); 
+  void guide( IGameObject unit, Square destination ); 
 }

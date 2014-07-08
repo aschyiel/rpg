@@ -36,7 +36,11 @@ import org.andengine.ui.activity.BaseGameActivity;
 import org.aschyiel.rpg.Coords;
 import org.aschyiel.rpg.Focus;
 import org.aschyiel.rpg.GameObject;
+import org.aschyiel.rpg.ICanHasFocus;
+import org.aschyiel.rpg.IFullGameObject;
+import org.aschyiel.rpg.IGameObject;
 import org.aschyiel.rpg.GameObjectFactory;
+import org.aschyiel.rpg.IGameObject;
 import org.aschyiel.rpg.PowerChords;
 import org.aschyiel.rpg.Resorcerer;
 import org.aschyiel.rpg.graph.ChessBoard;
@@ -241,7 +245,7 @@ public class Terrain
   * @param target May be null.
   */
   @Override
-  public void onSquareClicked( Square sq, GameObject target )
+  public void onSquareClicked( Square sq, IFullGameObject target )
   {
     Log.d( TAG, "onSquareClicked: square:"+ sq + ", target:"+ target );
     if ( null != currentlySelectedUnit )
@@ -251,9 +255,9 @@ public class Terrain
     setCurrentlySelectedUnit( target );
   }
   
-  private void setCurrentlySelectedUnit( GameObject unit )
+  private void setCurrentlySelectedUnit( IFullGameObject unit )
   {
-    final GameObject prev = currentlySelectedUnit;
+    final IFullGameObject prev = currentlySelectedUnit;
     if ( null != prev )
     {
       prev.setFocus( null );
@@ -272,6 +276,6 @@ public class Terrain
     // TODO: Update the HUD to show context information on the unit.
   }
 
-  private GameObject currentlySelectedUnit = null;
+  private IFullGameObject currentlySelectedUnit = null;
 
 }
