@@ -252,22 +252,37 @@ public class Terrain
   public void onSquareClicked( Square sq, IFullGameObject target )
   {
     Log.d( TAG, "onSquareClicked: square:"+ sq + ", target:"+ target );
-    if ( null != currentlySelectedUnit )
+    if ( null != currentPrimaryFocus )
     {
-      currentlySelectedUnit.applyAction( sq, target, gf );
+      currentPrimaryFocus.applyAction( sq, target, gf );
     }
-    setCurrentlySelectedUnit( target );
+
+    // To allow command-chaning, keep focus where appropriate.
+    if ( null                != target &&
+         currentPrimaryFocus != target &&
+         belongsToPlayer(       target ) )
+    {
+      setPrimaryFocus( target );
+    }
+
+    // TODO: Set secondary focus
+    //   - provide stats on selected enemy tank.
+    //   - still provide stats on currently selected tank.
   }
   
-  private void setCurrentlySelectedUnit( IFullGameObject unit )
+  /**
+  * Change the currently "selected" unit, belonging to the current player,
+  * which has focus. When given nothing, sets the current focus to nothing.
+  */
+  private void setPrimaryFocus( IFullGameObject unit )
   {
-    final IFullGameObject prev = currentlySelectedUnit;
+    final IFullGameObject prev = currentPrimaryFocus;
     if ( null != prev )
     {
       prev.setFocus( null );
     }
 
-    currentlySelectedUnit = unit;
+    currentPrimaryFocus = unit;
     if ( null != unit )
     {
       unit.setFocus( focus );
@@ -279,7 +294,16 @@ public class Terrain
     // TODO: Apply selection entity to track it.
     // TODO: Update the HUD to show context information on the unit.
   }
+  private IFullGameObject currentPrimaryFocus = null;
 
-  private IFullGameObject currentlySelectedUnit = null;
+  /**
+  * Returns true if the given unit belongs to the currently logged-in user;
+  * Returns false for enemy/neutral units, etc.
+  */
+  private boolean belongsToPlayer( IGameObject it )
+  {
+    // TODO
+    return true;
+  }
 
 }

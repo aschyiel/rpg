@@ -2,10 +2,12 @@ package org.aschyiel.rpg.graph;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.Set;
 
 import org.aschyiel.rpg.graph.ChessBoard.Square;
 import org.aschyiel.rpg.level.UnitType;
@@ -36,8 +38,8 @@ public class DefaultPathFinder implements PathFinder
   @Override
   public void findPath( final List<Step> path, final Square src, final Square dst, final UnitType unitType )
   {
-    final Map<String, Boolean> visited = new HashMap<String, Boolean>();
-    visited.put( src.name, true );
+    final Set<String> visited = new HashSet<String>();
+    visited.add( src.name );
 
     final PriorityQueue<Square> q = new PriorityQueue<Square>( anticipateWorst( src, dst ), getComparator( dst ) );
     q.add( src );
@@ -95,18 +97,18 @@ public class DefaultPathFinder implements PathFinder
 
   private void _findPath( final Map<String, Distance> xi,
                           final PriorityQueue<Square> q,
-                          final Map<String, Boolean> visited,
+                          final Set<String> visited,
                           final Square from,
                           final Square neighbor,
                           final UnitType unitType )
   {
     // Skip places we've already been.
-    if ( null == neighbor || null != visited.get( neighbor.name ) )
+    if ( null == neighbor || visited.contains( neighbor.name ) )
     {
       return;
     }
 
-    visited.put( neighbor.name, true );
+    visited.add( neighbor.name );
 
     // Ignore in-accessible places.
     if ( neighbor.isInaccessible( unitType ) )

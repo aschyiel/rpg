@@ -130,6 +130,7 @@ public class ChessBoard
       sprite.setSize( w, h );
       scn.registerTouchArea( sprite );
       scn.attachChild( sprite );
+      sq.sprite = sprite;
     }
   }
 
@@ -196,6 +197,9 @@ public class ChessBoard
     protected Square left;
     protected Square right;
 
+    /** For debugging. */
+    protected Sprite sprite;
+
     /**
     * Think alternating white vs. black squares in a chess-board.
     */
@@ -225,6 +229,11 @@ public class ChessBoard
       }
       occupant = unit;
       squaresByUnit.put( unit.getId(), this );
+
+      if ( Terrain.DEV && null != sprite )
+      {
+        sprite.setAlpha( 1f );
+      }
     }
 
     /**
@@ -234,11 +243,17 @@ public class ChessBoard
     {
       IGameObject unit = occupant;
       occupant = null;
-      if ( this == squaresByUnit.get( unit.getId() ) )
+      if ( null != unit && this == squaresByUnit.get( unit.getId() ) )
       {
         // GOTCHA: Be specific vs. last-one wins.
         squaresByUnit.put( unit.getId(), null );
       }
+
+      if ( Terrain.DEV && null != sprite )
+      {
+        sprite.setAlpha( 0.3f );
+      }
+
       return unit;
     }
 

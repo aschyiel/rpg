@@ -10,7 +10,7 @@ import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.andengine.util.modifier.IModifier;
 import org.aschyiel.rpg.graph.ChessBoard.Square;
-import org.aschyiel.rpg.graph.GirlFriend.NavCallback;
+import org.aschyiel.rpg.graph.Navigator.NavCallback;
 import org.aschyiel.rpg.graph.Navigator;
 import org.aschyiel.rpg.level.Player;
 import org.aschyiel.rpg.level.UnitType;

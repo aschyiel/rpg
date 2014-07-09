@@ -1,7 +1,7 @@
 package org.aschyiel.rpg;
 
 import org.aschyiel.rpg.graph.ChessBoard.Square;
-import org.aschyiel.rpg.graph.GirlFriend.NavCallback;
+import org.aschyiel.rpg.graph.Navigator.NavCallback;
 import org.aschyiel.rpg.graph.Navigator;
 import org.aschyiel.rpg.level.UnitType;
 

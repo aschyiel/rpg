@@ -14,5 +14,11 @@ public interface Navigator
   /**
   * Guide the given unit from it's current position to the target destination.
   */
-  void guide( IGameObject unit, Square destination ); 
+  void guide( IGameObject unit, Square destination );
+
+  // QQ javaScript Closures!
+  public interface NavCallback
+  {
+    void callback();
+  }
 }

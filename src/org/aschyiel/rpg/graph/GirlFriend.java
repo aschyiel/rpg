@@ -2,9 +2,11 @@ package org.aschyiel.rpg.graph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.aschyiel.rpg.Coords;
 import org.aschyiel.rpg.IGameObject;
@@ -20,7 +22,17 @@ import android.util.Log;
 public class GirlFriend implements Navigator, VacancySubscriber
 {
   private final ChessBoard matrix;
-  private final PowerChords sona;
+  private final PowerChords sona; 
+  
+  /**
+  * Keeps track of who is going where at any given time.
+  */
+  private final Map<IGameObject, NavPath> enroute;
+
+  /**
+  * A mechanism for animation-canceling.
+  */
+  private final Set<NavCallback> validCallbacks;
   
   private final static String TAG = "[RPG:Dr. GirlFriend]";
 
@@ -28,16 +40,32 @@ public class GirlFriend implements Navigator, VacancySubscriber
   {
     this.matrix = matrix;
     this.sona   = sona;
+    enroute = new HashMap<IGameObject, NavPath>();
+    validCallbacks = new HashSet<NavCallback>();
     matrix.subscribeToVacancies( this );
   }
 
   @Override
-  public void guide( IGameObject unit, Square dst )
+  public void guide( final IGameObject unit, final Square dst )
   {
-    Square src = matrix.findSquare( unit );
-    List<Step> steps = findPath( src, dst, unit.getUnitType() );
+    final Square src = matrix.findSquare( unit );
+    final List<Step> steps = findPath( src, dst, unit.getUnitType() );
     Step.print( steps );
-    guide( new NavPath( unit, steps ) );
+
+    // Allow last-minute re-routing.
+    final NavPath navi;
+    if ( isBusy( unit ) )
+    {
+      navi = enroute.get( unit );
+      navi.swapIn( steps );
+      validCallbacks.remove( navi.cb );
+    }
+    else
+    {
+      navi = new NavPath( unit, steps );
+      enroute.put( unit, navi );
+    }
+    guide( navi );
   }
 
   @Override
@@ -62,6 +90,15 @@ public class GirlFriend implements Navigator, VacancySubscriber
   }
 
   /**
+  * Returns true if something is currently busy going somewhere.
+  * Meaning we'll have to alter it's current route.
+  */
+  private boolean isBusy( IGameObject unit )
+  {
+    return null != enroute.get( unit );
+  }
+
+  /**
   * Recursively guide our game-object along it's path;
   * Asynchronous.
   */
@@ -71,18 +108,24 @@ public class GirlFriend implements Navigator, VacancySubscriber
     final GirlFriend gf = this;
     if ( navi.isAtDestination() )
     {
+      enroute.put( navi.unit, null );
       return;
     }
 
     final Step step = navi.getCurrentStep();
-    final NavCallback cb = new NavCallback()
+    final NavCallback cb = navi.cb = new NavCallback()
         {
           @Override
           public void callback()
           {
-            gf.guide( navi );
+            if ( gf.validCallbacks.contains( this ) )
+            {
+              gf.validCallbacks.remove( this );
+              gf.guide( navi );
+            }
           }
         };
+    gf.validCallbacks.add( cb );
 
     // Game-objects can get in the way of one another.
     // In which case we politely wait our turn.
@@ -138,9 +181,12 @@ public class GirlFriend implements Navigator, VacancySubscriber
     return path;
   }
 
-  public interface NavCallback
+  private void debug( NavPath navi )
   {
-    void callback();
+    Log.d( TAG, "nav-path:" + navi +", unit: "+ navi.unit );
+    for ( Step it : navi.steps )
+    {
+      Log.d( TAG, "sq: "+ it.to +", occupant status:"+ it.to.isOccupado() );
+    }
   }
-
 }

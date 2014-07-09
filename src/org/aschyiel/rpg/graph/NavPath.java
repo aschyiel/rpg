@@ -3,6 +3,7 @@ package org.aschyiel.rpg.graph;
 import java.util.List;
 
 import org.aschyiel.rpg.IGameObject; 
+import org.aschyiel.rpg.graph.Navigator.NavCallback;
 
 /**
 * A simple way of keeping track of both the game-object,
@@ -11,12 +12,15 @@ import org.aschyiel.rpg.IGameObject;
 public class NavPath
 {
   protected final IGameObject unit;
-  protected final List<Step> steps;
-  
+
+  protected List<Step> steps;
+
   /**
    * The current step index.
    */
   private int idx = 0;
+
+  protected NavCallback cb;
 
   public NavPath( final IGameObject unit, final List<Step> steps )
   {
@@ -41,5 +45,15 @@ public class NavPath
   {
     return ( idx < steps.size() )?
         steps.get( idx ) : null;
+  }
+
+  /**
+  * A mechanic for re-routing;
+  * Essentially tacks-on new steps to our existing steps.
+  */
+  protected void swapIn( final List<Step> detour )
+  {
+    idx = 0;
+    steps = detour;
   }
 }
