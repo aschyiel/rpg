@@ -3,6 +3,7 @@ package org.aschyiel.rpg;
 import org.andengine.entity.IEntity;
 import org.andengine.entity.modifier.IEntityModifier;
 import org.andengine.entity.modifier.MoveModifier;
+import org.andengine.entity.sprite.AnimatedSprite;
 import org.andengine.entity.sprite.Sprite;
 import org.andengine.entity.sprite.TiledSprite;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
@@ -17,7 +18,7 @@ import org.aschyiel.rpg.level.UnitType;
 /**
 * Well, um, everything is a game-object at the end of the day.
 */
-public class GameObject extends TiledSprite implements IFullGameObject
+public class GameObject extends AnimatedSprite implements IFullGameObject
 {
   private final Player owner;
   private final UnitType unitType;
@@ -158,7 +159,13 @@ public class GameObject extends TiledSprite implements IFullGameObject
               @Override
               public void onModifierStarted( IModifier<IEntity> pModifier, IEntity pItem )
               {
-                //..
+                final float dx = to.getX() - from.getX();
+                final float dy = to.getY() - from.getY();
+                Orientation orianna =   ( dx < 0 )?
+                    Orientation.LEFT  : ( dx > 0 )?
+                    Orientation.RIGHT : ( dy < 0 )?
+                    Orientation.UP    : Orientation.DOWN;
+                setOrientation( orianna );
               }
               
               @Override
@@ -180,6 +187,47 @@ public class GameObject extends TiledSprite implements IFullGameObject
     // TODO: How can we apply move-speed modifiers based on the current land-type? etc.
     //   ie. You should move slower through water.
     return 0.5f;
+  }
+
+  /**
+  * Change the tile animation to reflect
+  * the directional orientation of our game-object.
+  */
+  public void setOrientation( Orientation orianna )
+  {
+    int firstTileIndex = -1;
+    int lastTileIndex  = -1;
+    switch ( orianna )
+    {
+      // NOTE: Follows convetion implied by player.png.
+      //   @see AndEngine PathModifierExample.
+      case LEFT:
+        firstTileIndex =  9;
+        lastTileIndex  = 11;
+        break;
+      case RIGHT:
+        firstTileIndex =  3;
+        lastTileIndex  =  5;
+        break;
+      case UP:
+        firstTileIndex =  0;
+        lastTileIndex  =  2;
+        break;
+      case DOWN:
+        firstTileIndex =  6;
+        lastTileIndex  =  8;
+        break;
+      default:
+        throw new RuntimeException( "Unknown Animation-orientation." );
+    }
+    final long[] frameDurations = new long[]{ 200, 200, 200 };
+    final boolean loop = true;
+    animate( frameDurations, firstTileIndex, lastTileIndex, loop );
+  }
+
+  public enum Orientation
+  {
+    LEFT, RIGHT, UP, DOWN
   }
 
 }

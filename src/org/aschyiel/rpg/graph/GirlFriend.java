@@ -118,12 +118,6 @@ public class GirlFriend implements Navigator, VacancySubscriber
           cb.callback();
         }
       });
-
-    // TODO:
-    // 1. Update the sprite to be facing the right direction, and using the correct animation-loop.
-    // 2. Create a path in AndEngine
-    // 3. Execute the callback at the end of a single path.
-
   }
 
   private List<Step> findPath( final Square src, final Square dst, final UnitType unitType )

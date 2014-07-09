@@ -36,6 +36,7 @@ import org.andengine.ui.activity.BaseGameActivity;
 import org.aschyiel.rpg.Coords;
 import org.aschyiel.rpg.Focus;
 import org.aschyiel.rpg.GameObject;
+import org.aschyiel.rpg.GameObject.Orientation;
 import org.aschyiel.rpg.ICanHasFocus;
 import org.aschyiel.rpg.IFullGameObject;
 import org.aschyiel.rpg.IGameObject;
@@ -218,6 +219,9 @@ public class Terrain
       int n = details.getRow();
       board.placeUnit( unit, m, n );
       unit.setPosition( asCoords( m, n ) );
+
+      // TODO: Directionality should reflect the owner.
+      unit.setOrientation( Orientation.LEFT );
     }
   }
 
