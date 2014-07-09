@@ -13,7 +13,7 @@ public class NavPath
 {
   protected final IGameObject unit;
 
-  protected List<Step> steps;
+  protected final List<Step> steps;
 
   /**
    * The current step index.
@@ -54,6 +54,7 @@ public class NavPath
   protected void swapIn( final List<Step> detour )
   {
     idx = 0;
-    steps = detour;
+    steps.clear();
+    steps.addAll( detour );
   }
 }
