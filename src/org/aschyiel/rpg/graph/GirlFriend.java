@@ -176,7 +176,11 @@ public class GirlFriend implements Navigator, VacancySubscriber
               @Override
               public void callback()
               {
-                // GOTCHA: units live in two places at once while moving.
+                // GOTCHA: units instantly "live" in their next-slot while moving.
+                //   - Simplifies the same game-object moving back to it's previous square.
+                //   - Simplifies chaining unit movement "trains".
+                //   - Implies that you can "dodge" effects INSTANTLY by moving.
+                gf.matrix.removeUnit( from );
                 gf.matrix.placeUnit( unit, to );
               }
             },
@@ -187,7 +191,6 @@ public class GirlFriend implements Navigator, VacancySubscriber
               @Override
               public void callback()
               {
-                gf.matrix.removeUnit( from );
                 cb.callback();
               }
             });
