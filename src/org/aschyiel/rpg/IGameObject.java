@@ -18,5 +18,5 @@ public interface IGameObject
   void setPosition( Coords koords );
   void applyAction( Square sq, IGameObject them, Navigator gf );
   boolean isMobile();
-  void animate( Coords from, Coords to, NavCallback cb );
+  void animate( Coords from, Coords to, NavCallback cb1, NavCallback cb2 );
 }

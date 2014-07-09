@@ -103,21 +103,32 @@ public class GirlFriend implements Navigator, VacancySubscriber
                         final Square to,
                         final NavCallback cb )
   {
-    Log.d( TAG, "animate from:"+ from +", to: "+ to );
     final GirlFriend gf = this;
     unit.animate(
-      sona.asCoords( from.row, from.column ),
-      sona.asCoords( to  .row, to  .column ),
-      new NavCallback()
-      {
-        @Override
-        public void callback()
-        {
-          gf.matrix.removeUnit( from );
-          gf.matrix.placeUnit(  unit, to );
-          cb.callback();
-        }
-      });
+        sona.asCoords( from.row, from.column ),
+        sona.asCoords( to  .row, to  .column ),
+
+        //..before..
+        new NavCallback()
+            {
+              @Override
+              public void callback()
+              {
+                // GOTCHA: units live in two places at once while moving.
+                gf.matrix.placeUnit( unit, to );
+              }
+            },
+
+        //..after..
+        new NavCallback()
+            {
+              @Override
+              public void callback()
+              {
+                gf.matrix.removeUnit( from );
+                cb.callback();
+              }
+            });
   }
 
   private List<Step> findPath( final Square src, final Square dst, final UnitType unitType )

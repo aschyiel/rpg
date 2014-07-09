@@ -145,7 +145,10 @@ public class GameObject extends AnimatedSprite implements IFullGameObject
   }
 
   @Override
-  public void animate( final Coords from, final Coords to, final NavCallback cb )
+  public void animate( final Coords from,
+                       final Coords to,
+                       final NavCallback cb1,
+                       final NavCallback cb2 )
   {
     // TODO: Imply direction by changing which animation frames we're gonna use.
     registerEntityModifier( new MoveModifier(
@@ -166,12 +169,13 @@ public class GameObject extends AnimatedSprite implements IFullGameObject
                     Orientation.RIGHT : ( dy < 0 )?
                     Orientation.UP    : Orientation.DOWN;
                 setOrientation( orianna );
+                cb1.callback();
               }
               
               @Override
               public void onModifierFinished( IModifier<IEntity> pModifier, IEntity pItem )
               {
-                cb.callback();
+                cb2.callback();
               }
             }
         ));

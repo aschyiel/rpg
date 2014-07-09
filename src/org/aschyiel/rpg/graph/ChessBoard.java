@@ -234,7 +234,11 @@ public class ChessBoard
     {
       IGameObject unit = occupant;
       occupant = null;
-      squaresByUnit.put( unit.getId(), null );
+      if ( this == squaresByUnit.get( unit.getId() ) )
+      {
+        // GOTCHA: Be specific vs. last-one wins.
+        squaresByUnit.put( unit.getId(), null );
+      }
       return unit;
     }
 
