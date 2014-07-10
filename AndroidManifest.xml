@@ -22,6 +22,10 @@
             </intent-filter> 
         </activity>
         <activity android:name=".activities.Terrain" android:configChanges="orientation" />
+        <activity android:name=".activities.Sandbox" android:configChanges="orientation" />
+        <activity android:name=".activities.sandbox.BasicMovement"       android:configChanges="orientation" />
+        <activity android:name=".activities.sandbox.MovementVsLandTypes" android:configChanges="orientation" />
+        <activity android:name=".activities.sandbox.BasicCombat"         android:configChanges="orientation" />
     </application>
 
 </manifest>

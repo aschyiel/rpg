@@ -55,8 +55,8 @@ public class Launcher extends Activity
   */
   public void launchNextActivity()
   {
-    // TODO: For dev purposes, jump directly into the game environment.
-    startActivity( new Intent( this, org.aschyiel.rpg.activities.Terrain.class ) );
+    // TODO: For dev purposes, jump directly into the sandbox environment.
+    startActivity( new Intent( this, org.aschyiel.rpg.activities.Sandbox.class ) );
   }
 
   /**

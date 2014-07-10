@@ -11,4 +11,17 @@
     <string name="dialog_first_app_launch_title">First app launch title.</string>
     <string name="dialog_first_app_launch_message">First app launch message.</string>
 
+    <!--
+    *
+    * Sandbox stuff.
+    *
+    -->
+
+    <string name="sandbox_group_movement">Movement</string>
+    <string name="sandbox_group_combat">Combat</string>
+
+    <string name="sandbox_basic_movement">Basic Movement</string>
+    <string name="sandbox_movement_vs_land_types">Movement vs. Land-Types</string>
+    <string name="sandbox_basic_combat">Basic Combat</string>
+
 </resources>
