@@ -198,12 +198,11 @@ public class Terrain
   * Returns a description on how to setup the next level of terrain,
   * where to place units, etc.
   */
-  private Level getLevelInfo()
+  protected Level getLevelInfo()
   {
     // TODO: Check who's playing, what they're using, and serialize the level appropriately...
     Level lvl = new Level();
     lvl.getUnits().add( new LevelDetail( UnitType.TANK, 0, 0, Player.ONE ) );
-    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 2, 3, Player.CPU ) );
     return lvl;
   }
 

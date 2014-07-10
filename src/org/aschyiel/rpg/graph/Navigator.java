@@ -19,6 +19,9 @@ public interface Navigator
   // QQ javaScript Closures!
   public interface NavCallback
   {
-    void callback();
+    /**
+    * An anonymous closure - returns true meaning conditions have been satisfied.
+    */
+    boolean callback();
   }
 }

@@ -30,9 +30,9 @@ public class GirlFriend implements Navigator, VacancySubscriber
   private final Map<IGameObject, NavPath> enroute;
 
   /**
-  * Keeps track of who is idle while en-route.
+  * Keeps track of who is in the middle of animating between squares.
   */
-  private final Set<IGameObject> blocked;
+  private final Set<IGameObject> busyAnimating;
 
   private final static String TAG = "[RPG:Dr. GirlFriend]";
 
@@ -41,7 +41,7 @@ public class GirlFriend implements Navigator, VacancySubscriber
     this.matrix = matrix;
     this.sona   = sona;
     enroute = new HashMap<IGameObject, NavPath>();
-    blocked = new HashSet<IGameObject>();
+    busyAnimating = new HashSet<IGameObject>();
     matrix.subscribeToVacancies( this );
   }
 
@@ -51,14 +51,15 @@ public class GirlFriend implements Navigator, VacancySubscriber
     final Square src = matrix.findSquare( unit );
     final List<Step> steps = findPath( src, dst, unit.getUnitType() );
     final NavPath navi;
-    if ( isBusy( unit ) )
+    if ( isEnroute( unit ) )
     {
-      // Allow last-minute re-routing if it's already trying to go somewhere.
+      // Allow last-minute re-routing if it's already trying to go somewhere;
+      // Indirectly resumes the guide directive (protects against animation canceling).
       navi = enroute.get( unit );
       navi.swapIn( steps );    // GOTCHA: Changes to be picked-up via guide.
-      if ( isBlocked( unit ) )
+      if ( !busyAnimating.contains( unit ) )
       {
-        navi.cb.callback();    // Indirectly resume the guide directive.
+        navi.cb.callback();
       }
     }
     else
@@ -73,11 +74,21 @@ public class GirlFriend implements Navigator, VacancySubscriber
   @Override
   public void onVacancy( final Square sq )
   {
-    LinkedList<NavCallback> callbacks = vacancyListeners.get( sq.name ); 
-    while ( null != callbacks && callbacks.size() > 0 )
+    final LinkedList<NavCallback> callbacks = vacancyListeners.get( sq.name ); 
+    if ( null == callbacks )
     {
-      callbacks.pop().callback();
+      return;
     }
+    final LinkedList<NavCallback> unsatisfied = new LinkedList<NavCallback>(); 
+    while ( callbacks.size() > 0 )
+    {
+      NavCallback cb = callbacks.pop();
+      if ( !cb.callback() )
+      {
+        unsatisfied.push( cb );
+      }
+    }
+    callbacks.addAll( unsatisfied );
   }
 
   private Map<String, LinkedList<NavCallback>> vacancyListeners = new HashMap<String, LinkedList<NavCallback>>(); 
@@ -92,22 +103,12 @@ public class GirlFriend implements Navigator, VacancySubscriber
   }
 
   /**
-  * Returns true if something is currently busy going somewhere.
+  * Returns true if something is *already* going somewhere.
   * Meaning we'll have to alter it's current route.
   */
-  private boolean isBusy( IGameObject unit )
+  private boolean isEnroute( IGameObject unit )
   {
     return null != enroute.get( unit );
-  }
-
-  /**
-  * Returns true when a game-object is idle
-  * and waiting for it's next square to be vacant so that
-  * it can resume it's animation.
-  */
-  private boolean isBlocked( IGameObject unit )
-  {
-    return blocked.contains( unit );
   }
 
   /**
@@ -116,7 +117,6 @@ public class GirlFriend implements Navigator, VacancySubscriber
   */
   private void guide( final NavPath navi )
   {
-    Log.v( TAG, "gf#guide -- step:" + navi.getCurrentStep() );
     final GirlFriend gf = this;
     if ( navi.isAtDestination() )
     {
@@ -127,22 +127,18 @@ public class GirlFriend implements Navigator, VacancySubscriber
     final Step step = navi.getCurrentStep();
     final NavCallback cb = navi.cb = new NavCallback()
         {
-          // GOTCHA: Written as a single-use callback
-          //   to protect against animation-canceling.
           @Override
-          public void callback()
+          public boolean callback()
           {
-            if ( !spent )
+            final boolean isStillBlocked = null != navi.getCurrentStep() &&
+              navi.getCurrentStep().to.isOccupado();
+            if ( isStillBlocked )
             {
-              if ( gf.blocked.contains( navi.unit ) )
-              {
-                gf.blocked.remove( navi.unit );
-              }
-              gf.guide( navi );
+              return false;
             }
-            spent = true;
+            gf.guide( navi );
+            return true;
           }
-          private boolean spent = false;
         };
 
     // Game-objects can get in the way of one another.
@@ -151,11 +147,11 @@ public class GirlFriend implements Navigator, VacancySubscriber
     if ( isCockBlocked )
     {
       addVacancyListener( step.to, cb );
-      blocked.add( navi.unit );
     }
     else
     {
       navi.incrementStep();
+      gf.matrix.placeUnit( navi.unit, step.to );    //..Instantly double-park.
       animate( navi.unit, step.from, step.to, cb );
     }
   }
@@ -174,14 +170,15 @@ public class GirlFriend implements Navigator, VacancySubscriber
         new NavCallback()
             {
               @Override
-              public void callback()
+              public boolean callback()
               {
                 // GOTCHA: units instantly "live" in their next-slot while moving.
                 //   - Simplifies the same game-object moving back to it's previous square.
                 //   - Simplifies chaining unit movement "trains".
                 //   - Implies that you can "dodge" effects INSTANTLY by moving.
                 gf.matrix.removeUnit( from );
-                gf.matrix.placeUnit( unit, to );
+                gf.busyAnimating.add( unit );
+                return true;
               }
             },
 
@@ -189,9 +186,11 @@ public class GirlFriend implements Navigator, VacancySubscriber
         new NavCallback()
             {
               @Override
-              public void callback()
+              public boolean callback()
               {
+                gf.busyAnimating.remove( unit );
                 cb.callback();
+                return true;
               }
             });
   }
@@ -201,14 +200,5 @@ public class GirlFriend implements Navigator, VacancySubscriber
     List<Step> path = new ArrayList<Step>();
     DefaultPathFinder.getInstance().findPath( path, src, dst, unitType );
     return path;
-  }
-
-  private void debug( NavPath navi )
-  {
-    Log.d( TAG, "nav-path:" + navi +", unit: "+ navi.unit );
-    for ( Step it : navi.steps )
-    {
-      Log.d( TAG, "sq: "+ it.to +", occupant status:"+ it.to.isOccupado() );
-    }
   }
 }

@@ -18,11 +18,15 @@ public class Level
 
   public Level()
   {
+    this( 4, 5 );
+  }
+  public Level( int rows, int columns )
+  {
     units = new ArrayList<LevelDetail>();
 
     // TODO: Don't hardcode.
-    boardRows    = 4;
-    boardColumns = 5;
+    boardRows    = rows;
+    boardColumns = columns;
   }
 
   // TODO: This needs to be removed, after I write the serialization part.
