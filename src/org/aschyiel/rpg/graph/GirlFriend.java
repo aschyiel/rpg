@@ -74,21 +74,23 @@ public class GirlFriend implements Navigator, VacancySubscriber
   @Override
   public void onVacancy( final Square sq )
   {
-    final LinkedList<NavCallback> callbacks = vacancyListeners.get( sq.name ); 
-    if ( null == callbacks )
-    {
-      return;
-    }
-    final LinkedList<NavCallback> unsatisfied = new LinkedList<NavCallback>(); 
-    while ( callbacks.size() > 0 )
-    {
-      NavCallback cb = callbacks.pop();
-      if ( !cb.callback() )
-      {
-        unsatisfied.push( cb );
-      }
-    }
-    callbacks.addAll( unsatisfied );
+    return; // TODO:  provide a mechanic to resume guide callbacks without spinning our wheels.
+            //   Runnable vs. engine looks promising.    -uly, 160714
+//    final LinkedList<NavCallback> callbacks = vacancyListeners.get( sq.name );
+//    if ( null == callbacks )
+//    {
+//      return;
+//    }
+//    final LinkedList<NavCallback> unsatisfied = new LinkedList<NavCallback>();
+//    while ( callbacks.size() > 0 )
+//    {
+//      NavCallback cb = callbacks.pop();
+//      if ( !cb.callback() )
+//      {
+//        unsatisfied.push( cb );
+//      }
+//    }
+//    callbacks.addAll( unsatisfied );
   }
 
   private Map<String, LinkedList<NavCallback>> vacancyListeners = new HashMap<String, LinkedList<NavCallback>>(); 
@@ -151,7 +153,6 @@ public class GirlFriend implements Navigator, VacancySubscriber
     else
     {
       navi.incrementStep();
-      gf.matrix.placeUnit( navi.unit, step.to );    //..Instantly double-park.
       animate( navi.unit, step.from, step.to, cb );
     }
   }
@@ -176,6 +177,7 @@ public class GirlFriend implements Navigator, VacancySubscriber
                 //   - Simplifies the same game-object moving back to it's previous square.
                 //   - Simplifies chaining unit movement "trains".
                 //   - Implies that you can "dodge" effects INSTANTLY by moving.
+                gf.matrix.placeUnit( unit, to );
                 gf.matrix.removeUnit( from );
                 gf.busyAnimating.add( unit );
                 return true;
