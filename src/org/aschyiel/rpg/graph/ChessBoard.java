@@ -15,6 +15,7 @@ import org.aschyiel.rpg.IFullGameObject;
 import org.aschyiel.rpg.IGameObject;
 import org.aschyiel.rpg.Resorcerer;
 import org.aschyiel.rpg.activities.Terrain;
+import org.aschyiel.rpg.level.LandType;
 import org.aschyiel.rpg.level.UnitType;
 
 import android.util.Log;
@@ -38,6 +39,8 @@ public class ChessBoard
   protected final int columns;
 
   protected final Square[][] squares;
+  
+  private final LandType[][] squareTextures;
 
   public ChessBoard( int rows, int columns )
   {
@@ -45,9 +48,21 @@ public class ChessBoard
     this.columns = columns;
     squaresByUnit = new HashMap<Integer, Square>();
     squares = new Square[rows][columns];
+    squareTextures = new LandType[rows][columns];
 
     setupVertices();
     setupEdges();
+  } 
+  
+  
+  /**
+  * Provides a way of changing the land-type for an individual square.
+  * To be called BEFORE we create sprites for each square... 
+  */
+  public void setLandType( LandType landType, int row, int col )
+  {
+    squareTextures[row][col] = landType;
+    
   }
 
   public void placeUnit( final IGameObject unit, int row, int col )
@@ -110,7 +125,7 @@ public class ChessBoard
       final Square sq = squares[m][n];
       final Sprite sprite = new Sprite( w * n,
                                         h * m,
-                                        rez.getTexture( "terrain_tile" ),
+                                        rez.getLandTypeTexture( squareTextures[m][n] ),
                                         rez.getVertexBufferObjectManager() )
           {
             @Override
@@ -126,7 +141,6 @@ public class ChessBoard
               return true;
             }
           };
-      sprite.setAlpha( ( Terrain.DEV )? 0.3f : 0f );
       sprite.setSize( w, h );
       scn.registerTouchArea( sprite );
       scn.attachChild( sprite );
@@ -228,12 +242,7 @@ public class ChessBoard
         throw new RuntimeException( "NPE - Invalid occupant for square." );
       }
       occupant = unit;
-      squaresByUnit.put( unit.getId(), this );
-
-      if ( Terrain.DEV && null != sprite )
-      {
-        sprite.setAlpha( 1f );
-      }
+      squaresByUnit.put( unit.getId(), this ); 
     }
 
     /**
@@ -247,13 +256,7 @@ public class ChessBoard
       {
         // GOTCHA: Be specific vs. last-one wins.
         squaresByUnit.put( unit.getId(), null );
-      }
-
-      if ( Terrain.DEV && null != sprite )
-      {
-        sprite.setAlpha( 0.3f );
-      }
-
+      } 
       return unit;
     }
 
@@ -289,5 +292,4 @@ public class ChessBoard
       return isOccupado();
     }
   }
-
 }

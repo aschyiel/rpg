@@ -3,20 +3,36 @@ package org.aschyiel.rpg.activities.sandbox;
 import org.aschyiel.rpg.activities.Terrain;
 import org.aschyiel.rpg.level.*;
 
+/**
+* Demonstrates land-types affecting unit movement-speed.
+*/
 public class MovementVsLandTypes extends Terrain
 {
   @Override
   protected Level getLevelInfo()
   {
-    Level lvl = new Level( 8, 8 );
-    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 0, 0, Player.ONE ) );
-    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 1, 0, Player.ONE ) );
-    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 2, 0, Player.ONE ) );
-    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 3, 0, Player.ONE ) );
-    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 4, 0, Player.ONE ) );
-    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 5, 0, Player.ONE ) );
-    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 6, 0, Player.ONE ) );
-    lvl.getUnits().add( new LevelDetail( UnitType.TANK, 7, 0, Player.ONE ) );
+    int rows = 8;
+    int cols = 8;
+    Level lvl = new Level( rows, cols );
+
+    //
+    // Add a unit at the top of each column.
+    //
+
+    for ( int n = 0; n < cols; n++ )
+    {
+      lvl.getUnits().add( new LevelDetail( UnitType.TANK, 0, n, Player.ONE ) );
+    }
+
+    //
+    // Each column gets a different land-type.
+    //
+
+    for ( int m = 0; m < rows; m++ )
+    {
+      lvl.getLands().add( new LevelDetail( LandType.DESERT, m, 3 ) );
+    }
+
     return lvl;
   }
 }

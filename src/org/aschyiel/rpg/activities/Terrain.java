@@ -49,7 +49,7 @@ import org.aschyiel.rpg.graph.GirlFriend;
 import org.aschyiel.rpg.graph.Navigator;
 import org.aschyiel.rpg.graph.OnSquareClickHandler;
 import org.aschyiel.rpg.graph.ChessBoard.Square;
-import org.aschyiel.rpg.level.BackgroundType;
+import org.aschyiel.rpg.level.LandType;
 import org.aschyiel.rpg.level.Level;
 import org.aschyiel.rpg.level.LevelDetail;
 import org.aschyiel.rpg.level.Player;
@@ -153,10 +153,9 @@ public class Terrain
 
     board = new ChessBoard( lvl.getBoardRows(), lvl.getBoardColumns() );
     gf = new GirlFriend( board, (PowerChords) tera );
-    if ( DEV )
-    {
-      board.bindSquares( columnWidth, rowHeight, rez, scene, (OnSquareClickHandler) tera );
-    }
+
+    declareLandTypes( scene, lvl.getLandsIterator() ); 
+    board.bindSquares( columnWidth, rowHeight, rez, scene, (OnSquareClickHandler) tera );
 
     currentPerspective = Player.ONE;    // FIXME: This should be based on who we're signed in.
     focus = new Focus( rez, currentPerspective, columnWidth, rowHeight );
@@ -166,8 +165,10 @@ public class Terrain
     //   1. Populate units.
     //   2. Connect tiles.
     //   3. Render tiles based on level design.
-    scene.setBackground( rez.getBackground( BackgroundType.GRASS ) );
-
+    
+    // TODO: Allow changing the default background/land-type.
+//    scene.setBackground( rez.getBackground( LandType.PLAINS ) );
+    
     instantiateUnits( scene, lvl.getUnitsIterator() );
 
     // TODO:
@@ -214,13 +215,24 @@ public class Terrain
       LevelDetail details = it.next();
       GameObject unit = plant.makeUnit( details.getUnitType(), details.getOwner() );
       scene.attachChild( unit );
-      int m = details.getColumn();
-      int n = details.getRow();
+      int n = details.getColumn();
+      int m = details.getRow();
       board.placeUnit( unit, m, n );
       unit.setPosition( asCoords( m, n ) );
 
       // TODO: Directionality should reflect the owner.
       unit.setOrientation( Orientation.LEFT );
+    }
+  }
+  
+  private void declareLandTypes( final Scene scene, ListIterator<LevelDetail> it )
+  {
+    while ( it.hasNext() )
+    {
+      LevelDetail details = it.next();
+      int n = details.getColumn();
+      int m = details.getRow();
+      board.setLandType( details.getLandType(), m, n );
     }
   }
 

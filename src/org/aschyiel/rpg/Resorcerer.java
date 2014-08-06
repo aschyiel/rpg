@@ -11,10 +11,11 @@ import org.andengine.opengl.texture.TextureManager;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlas;
 import org.andengine.opengl.texture.atlas.bitmap.BitmapTextureAtlasTextureRegionFactory;
 import org.andengine.opengl.texture.atlas.bitmap.source.AssetBitmapTextureAtlasSource;
+import org.andengine.opengl.texture.region.ITextureRegion;
 import org.andengine.opengl.texture.region.TiledTextureRegion;
 import org.andengine.opengl.vbo.VertexBufferObjectManager;
 import org.aschyiel.rpg.activities.Terrain; 
-import org.aschyiel.rpg.level.BackgroundType;
+import org.aschyiel.rpg.level.LandType;
 import org.aschyiel.rpg.level.UnitType;
 
 /**
@@ -54,7 +55,7 @@ public class Resorcerer
     
     // Build-up backgrounds.
     backgrounds = new HashMap<String, IBackground>();
-    backgrounds.put( BackgroundType.GRASS.toString(), bg( "gfx/background_grass.png" ) );
+    backgrounds.put( LandType.PLAINS.toString(), bg( "gfx/background_plains.png" ) );
 
     // Build-up tile-textures.
     textures = new HashMap<String, TiledTextureRegion>();
@@ -76,7 +77,7 @@ public class Resorcerer
     return textures.get( name );
   }
 
-  public IBackground getBackground( BackgroundType bg )
+  public IBackground getBackground( LandType bg )
   {
     return backgrounds.get( bg.toString() );
   }
@@ -95,7 +96,10 @@ public class Resorcerer
     atlas = new BitmapTextureAtlas( tex, max, max );
     textures.put( UnitType.TANK.toString(),
                                   tile( "tank1.png",        3, 4, 128 ) );    // 96x128
-    textures.put( "terrain_tile", tile( "terrain_tile.png", 1, 3,  96 ) );    // 32x96
+    textures.put( LandType.PLAINS.toString(),
+                                  tile( "background_plains.png", 1, 1,  32 ) );    // 32x32
+    textures.put( LandType.DESERT.toString(),
+                                  tile( "background_desert.png", 1, 1,  32 ) );    // 32x32
     textures.put( "nav_point",    tile( "nav_point.png",    1, 1,  48 ) );    // 48x48
     textures.put( "focus",        tile( "focus.png",        1, 3,  96 ) );    // 32x96
 
@@ -134,5 +138,15 @@ public class Resorcerer
         tex,
         AssetBitmapTextureAtlasSource.create( missy, path ),
         buffy );
+  }
+
+  /**
+  * Returns the correct way to render a land-type;
+  * Defaults to the usual plains (grass). 
+  */
+  public ITextureRegion getLandTypeTexture( LandType landType )
+  {
+    return ( null == landType )?
+        textures.get( LandType.PLAINS.toString() ) : textures.get( landType.toString() );
   }
 }

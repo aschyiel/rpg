@@ -1,12 +1,15 @@
 package org.aschyiel.rpg.level;
 
-public enum BackgroundType
+// TODO Mountains, Forest, Flats.
+public enum LandType
 {
-  GRASS( "GRASS" );
-  
+  PLAINS(  "PLAINS" )    // Normal
+  , DESERT(  "DESERT" )  // Faster
+  ;
+
   private final String name;
   
-  BackgroundType( String name )
+  LandType( String name )
   {
     this.name = name;
   }

@@ -13,6 +13,7 @@ public class Level
 {
 
   private final List<LevelDetail> units;
+  private final List<LevelDetail> lands;
   private final int boardRows;
   private final int boardColumns;
 
@@ -23,16 +24,25 @@ public class Level
   public Level( int rows, int columns )
   {
     units = new ArrayList<LevelDetail>();
+    lands = new ArrayList<LevelDetail>();
 
     // TODO: Don't hardcode.
     boardRows    = rows;
     boardColumns = columns;
   }
 
-  // TODO: This needs to be removed, after I write the serialization part.
+  //
+  // TODO: Remove these list-getters vs. serialization.
+  //
+
   public List<LevelDetail> getUnits()
   {
     return units;
+  }
+
+  public List<LevelDetail> getLands()
+  {
+    return lands;
   }
 
   public ListIterator<LevelDetail> getUnitsIterator()
@@ -48,5 +58,9 @@ public class Level
   public int getBoardColumns()
   {
     return boardColumns;
+  }
+  public ListIterator<LevelDetail> getLandsIterator()
+  {
+    return lands.listIterator();
   }
 }
